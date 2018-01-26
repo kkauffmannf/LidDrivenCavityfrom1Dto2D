@@ -1,25 +1,18 @@
 /*
- * LidDrivenCavity_2DAlpha.cpp
+ * LidDrivenCavityfrom1Dto2D.cpp
  *
- * This program implements the problem of Versteeg's book,
- * Example 6.2, which consists in a planar two-dimensional nozzle
- * with a cross section that decreases linearly (from left to right).
- * The flow is steady and frictionless and the density of the fluid
- * is constant.
- * We use a backward-staggered grid with pressure nodes velocity nodes in between.
- * The stagnation pressure is given at the inlet (left) and the static pressure
- * is specified at the exit (right). Using the SIMPLE algorithm we solve
- * the discretized momentum and pressure correction equations and solve
- * for the unknown pressure and velocity nodes. We check whether the computed
- * velocity field satisfies continuity and evaluate the error in the computed
- * pressure and velocity fields by comparing with the exact solution.
- *
+ *  The problem consists in a square (or rectangular) cavity filled with a fluid, in which
+ * the top lid is moving at constant velocity while the other walls remain still.
+ * The grid is uniform.
+ * We use a backward-staggered grid with pressure nodes and velocity nodes in between.
+ * Using the SIMPLE algorithm we solve the discretized momentum and pressure
+ * correction equations with an underrelaxation factor for optimizing the convergence.
+ * *
  * It uses the libraries Eigen and gnuplot-iostream.h
  *
  *
  * Compile it with:
  * g++ -o -std=c++11 example example.cpp -lboost_iostreams -lboost_system -lboost_filesystem
- *
  *
  *  Created on: May 22, 2017
  *      Author: Karla Kauffmann
