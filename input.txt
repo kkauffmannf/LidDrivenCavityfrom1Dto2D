@@ -1,0 +1,11 @@
+N = 200
+L = 2.0
+p_in = 10.0
+p_out = 0.0
+density = 1.0
+Area_in = 0.5
+Area_out = 0.1
+m_dot = 1.0
+urfu = 0.6
+urfp = 0.6
+residual_threshold = 1.0E-5
