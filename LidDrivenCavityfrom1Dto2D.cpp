@@ -41,36 +41,47 @@ using namespace std::chrono;
 /* These are the global variables declared in global.h */
 
 /* Variables in input.txt to be defined at the start by the user. */
-int N = 5; /* number of pressure nodes for the CV computation */
-double L = 2.0; /* length of the rod */
-double p_in = 10.0; /* stagnation pressure at inlet of the nozzle */
-double p_out = 0.0; /* static pressure at the exit of the nozzle */
+int Nx = 130; /* number of pressure nodes for the CV computation in the y direction */
+int Ny = 130; /* number of pressure nodes for the CV computation in the x direction */
+double Lx = 1.0; /* length of the cavity in the x direction */
+double Ly = 1.0; /* length of the cavity in the y direction */
+double p_init = 0.0;
 double density = 1.0; /* density of the fluid */
-double Area_in = 0.5; /* cross-sectional area at the inlet */
-double Area_out = 0.1; /* cross-sectional area at the exit */
-double m_dot = 1.0; /* guessed mass flow rate to generate the an initial velocity field */
+double lid_velocity = 1.0; /* velocity of the lid */
+double Reynolds_num = 100.0; /* Reynolds number */
 double urfu = 0.8; /* under-relaxation factor for velocity u. Cannot be 0.0 since it goes in the denominator
                       of a_p in the momentum equations */
+double urfv = 0.8; /* under-relaxation factor for velocity v. Cannot be 0.0 since it goes in the denominator
+                      of a_p in the momentum equations */
 double urfp = 0.8; /* under-relaxation factor for pressure */
-double residual_threshold = 1.0E-5; /* the value of the residual to end the iterations */
+
+double residual_threshold = 1.0E-5; /* the value of the residuals to end the iterations */
 
 /* Physical quantities */
-vector<double> position_pressure_node; /* position of the pressure nodes */
-vector<double> position_velocity_node; /* position of the velocity nodes*/
-vector<double> Area_pressure_node;  /* cross section at pressure nodes */
-vector<double> Area_velocity_node; /* cross section at velocity nodes */
-vector<double> velocity;
-vector<double> velocity_old; /* the value of the velocity in the previous iteration */
-vector<double> pressure;
-vector<double> pressure_old; /* the value of the pressure in the previous iteration */
-vector<double> dx; /* parameter d for the pressure correction equation */
+vector<double> position_pressure_node_x; /* position of the pressure nodes in x */
+vector<double> position_pressure_node_y; /* position of the pressure nodes in y */
+vector<double> position_u_velocity_node_x; /* position of the u velocity nodes in x */
+vector<double> position_u_velocity_node_y; /* position of the u velocity nodes in y */
+vector<double> position_v_velocity_node_x; /* position of the v velocity nodes in x */
+vector<double> position_v_velocity_node_y; /* position of the v velocity nodes in y */
+vector<vector<double>> Area_pressure_node; /* Cross-section for the pressure nodes */
+vector<vector<double>> Area_velocity_node_u; /* Cross-section for the velocity nodes for u velocity with (i,J) indexes */
+vector<vector<double>> Area_velocity_node_v; /* Cross-section for the velocity nodes for v velocity with (I,j) indexes */
+vector<vector<double>> u_velocity; /* velocity in the x direction */
+vector<vector<double>> u_velocity_old; /* the value of the u_velocity in the previous iteration */
+vector<vector<double>> v_velocity; /* velocity in the y direction */
+vector<vector<double>> v_velocity_old; /* the value of the v_velocity in the previous iteration */
+vector<vector<double>> pressure;
+vector<vector<double>> pressure_old; /* the value of the pressure in the previous iteration */
+vector<vector<double>> d_u; /* parameter d for the pressure correction equation for u velocity with (i,J) indexes */
+vector<vector<double>> d_v; /* parameter d for the pressure correction equation for v velocity with (I,j) indexes */
 
 /* Variables used for the iterations */
 int i_iter = 0; /* number of iterations */
 int MAX_ITER = 1000000; /* set the maximum number of iterations to store in the residual vector */
 vector<double> x_momentum_residual_sum; /* sum of the residuals of the x-momentum equation per iteration*/
+vector<double> y_momentum_residual_sum; /* sum of the residuals of the y-momentum equation per iteration*/
 vector<double> pressure_residual_sum; /* sum of the residuals of the pressure equation per iteration*/
-
 
 /* Main execution of the program */
 int main()
@@ -86,21 +97,29 @@ int main()
    /* reads the file input.txt and stores the values */
    readinput();
 
-
    /* Physical quantities vector size definition. They are resized here because they depend on the input value of N.
     * Pressure and velocity nodes vectors have different lengths because a staggered grid is used  */
-   position_pressure_node.resize(N);
-   position_velocity_node.resize(N-1);
-   Area_pressure_node.resize(N);
-   Area_velocity_node.resize(N-1);
-   velocity.resize(N-1);
-   velocity_old.resize(N-1);
-   pressure.resize(N);
-   pressure_old.resize(N);
-   dx.resize(N-1);
+   position_pressure_node_x.resize(Nx);
+   position_pressure_node_y.resize(Ny);
+   position_u_velocity_node_x.resize(Nx);
+   position_u_velocity_node_y.resize(Ny);
+   position_v_velocity_node_x.resize(Nx);
+   position_v_velocity_node_y.resize(Ny);
+   Area_pressure_node.resize(Nx,vector<double>(Ny));
+   Area_velocity_node_u.resize(Nx,vector<double>(Ny));
+   Area_velocity_node_v.resize(Nx,vector<double>(Ny));
+   u_velocity.resize(Nx,vector<double>(Ny));
+   u_velocity_old.resize(Nx,vector<double>(Ny));
+   v_velocity.resize(Nx,vector<double>(Ny));
+   v_velocity_old.resize(Nx,vector<double>(Ny));
+   pressure.resize(Nx,vector<double>(Ny));
+   pressure_old.resize(Nx,vector<double>(Ny));
+   d_u.resize(Nx,vector<double>(Ny));
+   d_v.resize(Nx,vector<double>(Ny));
 
    /* The residuals are stored for each iteration with a maximum iteration number of MAX_ITER */
    x_momentum_residual_sum.resize(MAX_ITER);
+   y_momentum_residual_sum.resize(MAX_ITER);
    pressure_residual_sum.resize(MAX_ITER);
 
 
@@ -108,88 +127,102 @@ int main()
    initialization();
 
 
-   /* We obtain the guessed velocities (u_star*) by solving the system of
-	* momentum equations. */
-   VectorXd u_star;
-   momentum_equation_solve(u_star,i_iter);
+//   /* We obtain the guessed velocities (u_star*) by solving the system of
+//	* momentum equations. */
+//   MatrixXd u_star;
+//   MatrixXd v_star;
+//   momentum_equation_solve(u_star, v_star, i_iter);
+//
 
+   //////////////////////////////////////////////////////////////////////////////
 
-   /* Now that we solved the momentum equations we have to solve the
-    * pressure correction equations
-    */
+//
+//   /* Now that we solved the momentum equations we have to solve the
+//    * pressure correction equations
+//    */
+//
+//
+//   /* for the zeroth iteration we don't have pressure correction yet, so we use the
+//    * initially guessed pressure. We map the array of the vector type to a MatrixXd.
+//    * MatrixXD pressure_prime = vector<vector<double>> pressure */
+//   MatrixXd pressure_prime (pressure.size(), pressure[0].size());
+//
+//   /* cast unsigned int pressure.size to int to be able to compare */
+//   int signedIntsize = (int) pressure.size();
+//   for (int i = 0; i < signedIntsize; ++i){
+//       pressure_prime.row(i) = VectorXd::Map(&pressure[i][0], pressure[0].size());
+//   }
+//   pressure_correction_equation_solve(u_star,v_star, pressure_prime,i_iter);
 
+   ///////////////////////////////////////////////////////////////////////////////////////
 
-   /* for the zeroth iteration we don't have pressure correction yet, so we use the
-    * initially guessed pressure */
-   VectorXd pressure_prime = VectorXd::Map(pressure.data(), pressure.size());
-   pressure_correction_equation_solve(u_star,pressure_prime,i_iter);
-
-   /* We have the velocities from the momentum equation and the pressures corrections,
-    * so we now proceed to correct the pressure and velocities  */
-   correct_pressure_and_velocities(u_star,pressure_prime);
-
-   /* We apply the underrelaxation factors for velocity and pressure */
-   underrelaxation();
-
-
-
-
-
-      /* Start next iteration until the residuals are lower than the threshold */
-      while( (x_momentum_residual_sum[i_iter] > residual_threshold) || (pressure_residual_sum[i_iter] > residual_threshold) ) {
-
-
-    	      /* the new velocities and pressures are the old ones in the next iteration */
-    	      for(int i=0;i<(N-1);i++){
-    	         velocity_old[i] = velocity[i];
-    	      }
-
-    	      for(int i=0;i<N;i++){
-    	         pressure_old[i] = pressure[i];
-    	      }
-
-
-    	      /* Solving the momentum equation */
-    	      VectorXd u_star;
-              momentum_equation_solve(u_star,(i_iter + 1));
-
-
-              /* Solving the pressure equation */
-              pressure_correction_equation_solve(u_star,pressure_prime,(i_iter + 1));
-
-
-              /* Correcting the pressure and velocity */
-              correct_pressure_and_velocities(u_star,pressure_prime);
-
-
-              /* Applying the underrelaxation factor */
-              underrelaxation();
-
-
-         /* Prints out the residuals */
-	     cout << i_iter << "\t" << x_momentum_residual_sum[i_iter] << "\t" << pressure_residual_sum[i_iter] << endl;
-
-	     /* Advancing the iteration number */
-	     i_iter++;
-
-	 /*************************** */
-
-
-      }
-
-      /* print out the position, the velocity and pressure */
-      cout << endl;
-      cout << "# position" << "\t" << "velocity" << "\t" << "pressure" << endl;
-      for(int i=0;i<(N-1);i++){
-    	  cout << position_velocity_node[i] << "\t" << velocity[i] << "\t" << pressure[i] << endl;
-   	      }
+//
+//   /* We have the velocities from the momentum equation and the pressures corrections,
+//    * so we now proceed to correct the pressure and velocities  */
+//   correct_pressure_and_velocities(u_star,pressure_prime);
+//
+//   /* We apply the underrelaxation factors for velocity and pressure */
+//   underrelaxation();
+//
+//
+//
+//
+//
+//      /* Start next iteration until the residuals are lower than the threshold */
+//      while( (x_momentum_residual_sum[i_iter] > residual_threshold) || (pressure_residual_sum[i_iter] > residual_threshold) ) {
+//
+//
+//    	      /* the new velocities and pressures are the old ones in the next iteration */
+//    	      for(int i=0;i<(Nx-1);i++){
+//    	         velocity_old[i] = velocity[i];
+//    	      }
+//
+//    	      for(int i=0;i<Nx;i++){
+//    	         pressure_old[i] = pressure[i];
+//    	      }
+//
+//
+//    	      /* Solving the momentum equation */
+//    	      VectorXd u_star;
+//              momentum_equation_solve(u_star,(i_iter + 1));
+//
+//
+//              /* Solving the pressure equation */
+//              pressure_correction_equation_solve(u_star,pressure_prime,(i_iter + 1));
+//
+//
+//              /* Correcting the pressure and velocity */
+//              correct_pressure_and_velocities(u_star,pressure_prime);
+//
+//
+//              /* Applying the underrelaxation factor */
+//              underrelaxation();
+//
+//
+//         /* Prints out the residuals */
+//	     cout << i_iter << "\t" << x_momentum_residual_sum[i_iter] << "\t" << pressure_residual_sum[i_iter] << endl;
+//
+//	     /* Advancing the iteration number */
+//	     i_iter++;
+//
+//	 /*************************** */
+//
+//
+//      }
+//
+//      /* print out the position, the velocity and pressure */
+//      cout << endl;
+//      cout << "# position" << "\t" << "velocity" << "\t" << "pressure" << endl;
+//      for(int i=0;i<(Nx-1);i++){
+//    	  cout << position_velocity_node[i] << "\t" << velocity[i] << "\t" << pressure[i] << endl;
+//   	      }
 
      /* color map of the velocities in 1 D */
      plotcolormap();
 
 
-     /* Residuals vs iterations */
-     plotresiduals();
+//     /* Residuals vs iterations */
+//     plotresiduals();
 
      /* Ending the execution and printing the execution time */
      high_resolution_clock::time_point t2 = high_resolution_clock::now();

@@ -21,63 +21,127 @@ using namespace std;
 
 void initialization()
 {
-	   /* initialize values of the x-momentum residual */
-	   for (int i=0;i<(MAX_ITER);i++) {
-		       x_momentum_residual_sum[i] = 0.0;
-	         }
+	/* initialize values of the x-momentum residual */
+		   for (int i=0;i<(MAX_ITER);i++) {
+			       x_momentum_residual_sum[i] = 0.0;
+		         }
 
-	   /* initialize values of the pressure residual */
-	   for (int i=0;i<(MAX_ITER);i++) {
-		       pressure_residual_sum[i] = 0.0;
-	         }
+		   /* initialize values of the x-momentum residual */
+		   for (int i=0;i<(MAX_ITER);i++) {
+			       y_momentum_residual_sum[i] = 0.0;
+		         }
 
-	   /* initialize values of the position of the pressure and velocity nodes.
-	    * It is a uniform grid. */
-	   double delta_x = L/(N-1); /* spacing of the grid (uniform grid) */
+		   /* initialize values of the pressure residual */
+		   for (int i=0;i<(MAX_ITER);i++) {
+			       pressure_residual_sum[i] = 0.0;
+		         }
 
-	   for (int i=0;i<N;i++) {
-	   	   position_pressure_node[i] = delta_x*i;
-	      }
+		   /* initialize values of the position of the pressure and velocity nodes.
+		    * It is a uniform grid. */
+		   double delta_x = Lx/(Nx-0.5); /* spacing of the grid in x (uniform grid) */
+		   double delta_y = Ly/(Ny-0.5); /* spacing of the grid in y (uniform grid) */
 
-	   for (int i=0;i<(N-1);i++) {
-	       position_velocity_node[i] = delta_x*(i+0.5);
-	      }
+		   for (int i=0;i<Nx;i++) {
+		   	   position_pressure_node_x[i] = delta_x*(i+0.5);
+		   }
 
-	   /* initialize values of Areas for N pressure and (N-1) velocity nodes.
-	     * It decreases linearly. */
-	   for (int i=0;i<N;i++) {
-		   Area_pressure_node[i] = Area_in - ((Area_in-Area_out)/(N-1)*i);
-	   }
+		   for (int j=0;j<Ny;j++) {
+		   	   position_pressure_node_y[j] = delta_y*(j+0.5);
+		   }
 
-	   for (int i=0;i<(N-1);i++) {
-	   	   Area_velocity_node[i] = Area_in - ((Area_in-Area_out)/(N-1)*(i+0.5));
-	      }
+		   for (int i=0;i<Nx;i++) {
+		       position_u_velocity_node_x[i] = delta_x*i;
+		      }
 
-	   /* initialize values of velocities using the mass flow */
-	   for (int i=0;i<(N-1);i++) {
-	      	   velocity[i] = m_dot/(density*Area_velocity_node[i]);
-	         }
+		   for (int j=0;j<Ny;j++) {
+		       position_u_velocity_node_y[j] = delta_x*(j+0.5);
+		      }
 
-	   /* initialize values of old velocities, in this case, the same as the actual
-	    * velocities because we haven't performed any iteration yet */
-	   for (int i=0;i<(N-1);i++) {
-	      	   velocity_old[i] = m_dot/(density*Area_velocity_node[i]);
-	         }
+		   for (int i=0;i<Nx;i++) {
+		       position_v_velocity_node_x[i] = delta_x*(i+0.5);
+		      }
 
-	   /* initialize values of the pressure
-	    * we assume a linear variation between the inlet and outlet */
-	   for (int i=0;i<N;i++) {
-	      	   pressure[i] = p_in - (p_in - p_out)/(N-1)*i;
-	         }
+		   for (int j=0;j<Ny;j++) {
+		       position_v_velocity_node_y[j] = delta_x*j;
+		      }
 
-	   /* initialize values of old pressures, in this case, the same as the actual
-	    * pressures because we haven't performed any iteration yet */
-	   for (int i=0;i<N;i++) {
-	           pressure_old[i] = p_in - (p_in - p_out)/(N-1)*i;
-	         }
+		   /* initialize values of Areas pressure and velocity nodes */
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+				   Area_velocity_node_u[i][j] = delta_x*delta_y;
+			   }
+		   }
 
-	   /* initialize values of the parameter d for the pressure correction equation */
-	   for (int i=0;i<(N-1);i++) {
-			   dx[i] = 0.0;
-		     }
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+				   Area_velocity_node_v[i][j] = delta_x*delta_y;
+			   }
+		   }
+
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+				   Area_pressure_node[i][j] = delta_x*delta_y;
+			   }
+		   }
+
+		   /* initialize values of velocities */
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+		          u_velocity[i][j] = 0.0;
+		          if (j==(Ny-1)){
+		              u_velocity[i][j] = lid_velocity;
+		          }
+			   }
+		   }
+
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+		   	      v_velocity[i][j] = 0.0;
+			   }
+		   }
+
+		   /* initialize values of old velocities, in this case, the same as the actual
+		    * velocities because we haven't performed any iteration yet */
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+		          u_velocity_old[i][j] = 0.0;
+		          if (j==(Ny-1)){
+			          u_velocity[i][j] = lid_velocity;
+		          }
+			   }
+		   }
+
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+		   	      v_velocity_old[i][j] = 0.0;
+			   }
+		   }
+
+		   /* initialize values of the pressure */
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+		          pressure[i][j] = p_init;
+			   }
+		   }
+
+		   /* initialize values of old pressures, in this case, the same as the actual
+		    * pressures because we haven't performed any iteration yet */
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+		          pressure_old[i][j] = p_init;
+			   }
+		   }
+
+		   /* initialize values of the parameter d for the pressure correction equation */
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+				   d_u[i][j] = 0.0;
+			   }
+		   }
+
+		   for (int i=0;i<Nx;i++) {
+		  		   for (int j=0;j<Ny;j++) {
+		  			   d_v[i][j] = 0.0;
+		  		   }
+		  	   }
 }
