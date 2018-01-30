@@ -54,7 +54,7 @@ void initialization()
 		      }
 
 		   for (int j=0;j<Ny;j++) {
-		       position_u_velocity_node_y[j] = delta_x*(j+0.5);
+		       position_u_velocity_node_y[j] = delta_y*(j+0.5);
 		      }
 
 		   for (int i=0;i<Nx;i++) {
@@ -62,7 +62,7 @@ void initialization()
 		      }
 
 		   for (int j=0;j<Ny;j++) {
-		       position_v_velocity_node_y[j] = delta_x*j;
+		       position_v_velocity_node_y[j] = delta_y*j;
 		      }
 
 		   /* initialize values of Areas pressure and velocity nodes */

@@ -45,9 +45,9 @@ void plotcolormap()
    int index=0;
    for(int counter1=0;counter1<Nx;counter1++) {
 	   for(int counter2=0;counter2<Ny;counter2++){
-		   index = Ny*counter1+counter2;
+		   index = Nx*counter1+counter2;
 		   velocities[index][0]=position_u_velocity_node_x[counter1];
-		   velocities[index][1]=position_u_velocity_node_y[counter2];
+		   velocities[index][1]=position_v_velocity_node_y[counter2];
 		   velocities[index][2]=sqrt(u_velocity[counter1][counter2]*u_velocity[counter1][counter2] + v_velocity[counter1][counter2]*v_velocity[counter1][counter2]);
        }
    }
