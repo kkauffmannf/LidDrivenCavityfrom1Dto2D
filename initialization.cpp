@@ -106,7 +106,7 @@ void initialization()
 			   for (int j=0;j<Ny;j++) {
 		          u_velocity_old[i][j] = 0.0;
 		          if (j==(Ny-1)){
-			          u_velocity[i][j] = lid_velocity;
+			          u_velocity_old[i][j] = lid_velocity;
 		          }
 			   }
 		   }

@@ -49,7 +49,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="plotresiduals.cpp|pressure_correction_equation_solve.cpp|underrelaxation.cpp|correct_pressure_and_velocities.cpp|momentum_equation_solve.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="plotresiduals.cpp|pressure_correction_equation_solve.cpp|underrelaxation.cpp|correct_pressure_and_velocities.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -103,7 +103,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="plotresiduals.cpp|pressure_correction_equation_solve.cpp|underrelaxation.cpp|correct_pressure_and_velocities.cpp|momentum_equation_solve.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="plotresiduals.cpp|pressure_correction_equation_solve.cpp|underrelaxation.cpp|correct_pressure_and_velocities.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
