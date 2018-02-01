@@ -127,17 +127,6 @@ int main()
    initialization();
 
 
-//   /* print out the position, the velocity and pressure */
-//        cout << endl;
-//        cout << "# position" << "\t" << "velocity" << "\t" << "pressure" << endl;
-//        for(int i=0;i<Nx;i++){
-//        	for(int j=0;j<Ny;j++){
-//      	  cout << position_u_velocity_node_x[i] << "\t" << position_v_velocity_node_y[j] << "\t" << u_velocity[i][j] << "\t" << pressure[i][j] << endl;
-//        	}
-//        }
-
-
-
    /* We obtain the guessed velocities (u_star*) by solving the system of
 	* momentum equations. */
    MatrixXd u_star;
@@ -147,6 +136,16 @@ int main()
    v_star.resize(Nx,Ny);
    v_star=MatrixXd::Zero(Nx,Ny);
    momentum_equation_solve(u_star, v_star, i_iter);
+
+   cout << u_star << endl;
+   cout << v_star << endl;
+
+   for(int i=0;i<Nx;i++){
+	   for(int j=0;j<Ny;j++){
+		   u_velocity[i][j]=u_star(i,j);
+		   v_velocity[i][j]=v_star(i,j);
+	   }
+   }
 
 
    //////////////////////////////////////////////////////////////////////////////
