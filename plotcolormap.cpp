@@ -43,12 +43,12 @@ void plotcolormap()
    // for each value of x, y loops from -r to r where r is the radius of the area
    // corresponding to that position x.
    int index=0;
-   for(int counter1=0;counter1<Nx;counter1++) {
-	   for(int counter2=0;counter2<Ny;counter2++){
-		   index = Nx*counter1+counter2;
-		   velocities[index][0]=position_u_velocity_node_x[counter1];
-		   velocities[index][1]=position_v_velocity_node_y[counter2];
-		   velocities[index][2]=sqrt(u_velocity[counter1][counter2]*u_velocity[counter1][counter2] + v_velocity[counter1][counter2]*v_velocity[counter1][counter2]);
+   for(int counter1=0;counter1<Ny;counter1++) {
+	   for(int counter2=0;counter2<Nx;counter2++){
+		   velocities[index][0]=position_v_velocity_node_y[counter1];
+		   velocities[index][1]=position_u_velocity_node_x[counter2];
+		   velocities[index][2]=sqrt(u_velocity[counter2][counter1]*u_velocity[counter2][counter1] + v_velocity[counter2][counter1]*v_velocity[counter2][counter1]);
+		   index++;
        }
    }
 
@@ -87,9 +87,9 @@ void plotcolormap()
 //
 
 //	gp << "splot " << gp.file1d(velocities) << " using 2:1:3\n";
-	gp << "plot " << gp.file1d(velocities) << " using 1:2:3 with image pixels" << endl;
+	gp << "plot " << gp.file1d(velocities) << " using 2:1:3 with image pixels\n" << endl;
 
     //Generates pdf figure
-	gp << "set term pdf\nset output 'velocity_cavity.pdf'\nreplot\nset term x11" << endl;
+//	gp << "set term pdf\nset output 'velocity_cavity.pdf'\nreplot\nset term x11" << endl;
 
 }
