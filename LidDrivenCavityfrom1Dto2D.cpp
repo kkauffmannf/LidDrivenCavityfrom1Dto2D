@@ -150,23 +150,23 @@ int main()
 
    //////////////////////////////////////////////////////////////////////////////
 
-//
-//   /* Now that we solved the momentum equations we have to solve the
-//    * pressure correction equations
-//    */
-//
-//
-//   /* for the zeroth iteration we don't have pressure correction yet, so we use the
-//    * initially guessed pressure. We map the array of the vector type to a MatrixXd.
-//    * MatrixXD pressure_prime = vector<vector<double>> pressure */
-//   MatrixXd pressure_prime (pressure.size(), pressure[0].size());
-//
-//   /* cast unsigned int pressure.size to int to be able to compare */
-//   int signedIntsize = (int) pressure.size();
-//   for (int i = 0; i < signedIntsize; ++i){
-//       pressure_prime.row(i) = VectorXd::Map(&pressure[i][0], pressure[0].size());
-//   }
-//   pressure_correction_equation_solve(u_star,v_star, pressure_prime,i_iter);
+
+   /* Now that we solved the momentum equations we have to solve the
+    * pressure correction equations
+    */
+
+
+   /* for the zeroth iteration we don't have pressure correction yet, so we use the
+    * initially guessed pressure. We map the array of the vector type to a MatrixXd.
+    * MatrixXD pressure_prime = vector<vector<double>> pressure */
+   MatrixXd pressure_prime (pressure.size(), pressure[0].size());
+
+   /* cast unsigned int pressure.size to int to be able to compare */
+   int signedIntsize = (int) pressure.size();
+   for (int i = 0; i < signedIntsize; ++i){
+       pressure_prime.row(i) = VectorXd::Map(&pressure[i][0], pressure[0].size());
+   }
+   pressure_correction_equation_solve(u_star,v_star, pressure_prime,i_iter);
 
    ///////////////////////////////////////////////////////////////////////////////////////
 

@@ -102,9 +102,9 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 
 						   /* Equations for u_velocity */
 						   F_w = 0.0;
-						   F_e = 0.5 * density * ( u_velocity_old[i+1][j] + 0.5 * u_velocity_old[i][j] );
-						   F_s = 0.25 * density * v_velocity_old[i][j];
-						   F_n = 0.5 * density * v_velocity_old[i][j+1];
+						   F_e = 0.5 * density * ( u_velocity[i+1][j] + 0.5 * u_velocity[i][j] );
+						   F_s = 0.25 * density * v_velocity[i][j];
+						   F_n = 0.5 * density * v_velocity[i][j+1];
 						   D_w = 0.0;
 						   D_e = Gamma_constant/delta_x;
 						   D_s = 0.25 * Gamma_constant/delta_y;
@@ -117,15 +117,17 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   S_u = 0.0;
 						   delta_F = F_e + F_n - F_s - F_w;
 						   a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+						   a_p = a_p/urfu;
 						   A_u_velocity(j,j) = a_p;
 						   A_u_velocity(j,j+1) = - a_n;
-						   b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + S_u;
+						   b_u_velocity(j) = a_e * u_velocity[i+1][j] + S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 						   /* Equations for v_velocity */
-						   F_w = 0.25 * density * u_velocity_old[i][j];
-						   F_e = 0.5 * density * u_velocity_old[i+1][j];
-						   F_s = 0.25 * density * v_velocity_old[i][j];
-						   F_n = 0.5 * density * ( 0.5 * v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+						   F_w = 0.25 * density * u_velocity[i][j];
+						   F_e = 0.5 * density * u_velocity[i+1][j];
+						   F_s = 0.25 * density * v_velocity[i][j];
+						   F_n = 0.5 * density * ( 0.5 * v_velocity[i][j] + v_velocity[i][j+1]);
 						   D_w = 0.25 * Gamma_constant/delta_x;
 						   D_e = 0.5 * Gamma_constant/delta_x;
 						   D_s = 0.0;
@@ -138,9 +140,11 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   S_v = 0.0;
 						   delta_F = F_e + F_n - F_s - F_w;
 						   a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+						   a_p = a_p/urfv;
 						   A_v_velocity(j,j) = a_p;
 						   A_v_velocity(j,j+1) = - a_n;
-						   b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + S_v;
+						   b_v_velocity(j) = a_e * v_velocity[i+1][j] + S_v + (1 - urfv) * a_p * v_velocity_old[i][j];;
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* SPECIAL CASE FOR V*/
 					   /* This is a special case because for v velocity, F_s has a term
@@ -149,9 +153,9 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 
 						   /* Equations for u_velocity: same as WEST GENERAL*/
 						   F_w = 0.0;
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + 0.5 * u_velocity_old[i][j] );
-				           F_s = 0.5 * density * v_velocity_old[i][j];
-				           F_n = 0.5 * density * v_velocity_old[i][j+1];
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + 0.5 * u_velocity[i][j] );
+				           F_s = 0.5 * density * v_velocity[i][j];
+				           F_n = 0.5 * density * v_velocity[i][j+1];
 				           D_w = 0.0;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = 0.5 * Gamma_constant/delta_y;
@@ -164,16 +168,18 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.25 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i+1][j-1]);
-				           F_s = 0.5 * density * ( 0.5 * v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+						   F_w = 0.25 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
+				           F_s = 0.5 * density * ( 0.5 * v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = 0.5 * Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -186,17 +192,19 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_v = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* WEST TOP */
 					   else if (j==(Ny-1)){
 						   /* Equations for u_velocity */
 						   F_w = 0.0;
-						   F_e = 0.5 * density * ( u_velocity_old[i+1][j] + 0.5 * u_velocity_old[i][j] );
-						   F_s = 0.5 * density * v_velocity_old[i][j];
+						   F_e = 0.5 * density * ( u_velocity[i+1][j] + 0.5 * u_velocity[i][j] );
+						   F_s = 0.5 * density * v_velocity[i][j];
 						   F_n = 0.0;
 						   D_w = 0.0;
 						   D_e = Gamma_constant/delta_x;
@@ -210,15 +218,17 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   S_u = ( D_n - F_n ) * lid_velocity;
 						   delta_F = F_e + F_n - F_s - F_w;
 						   a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+						   a_p = a_p/urfu;
 						   A_u_velocity(j,j) = a_p;
 						   A_u_velocity(j,j-1) = - a_s;
-						   b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + S_u;
+						   b_u_velocity(j) = a_e * u_velocity[i+1][j] + S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.25 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i+1][j-1]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * v_velocity_old[i][j] ;
+						   F_w = 0.25 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
+				           F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * v_velocity[i][j] ;
 				           D_w = 0.5 * Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -231,17 +241,19 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_v = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* WEST GENERAL */
 					   else {
 						   /* Equations for u_velocity */
 						   F_w = 0.0;
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + 0.5 * u_velocity_old[i][j] );
-				           F_s = 0.5 * density * v_velocity_old[i][j];
-				           F_n = 0.5 * density * v_velocity_old[i][j+1];
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + 0.5 * u_velocity[i][j] );
+				           F_s = 0.5 * density * v_velocity[i][j];
+				           F_n = 0.5 * density * v_velocity[i][j+1];
 				           D_w = 0.0;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = 0.5 * Gamma_constant/delta_y;
@@ -254,16 +266,18 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.25 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i+1][j-1]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+						   F_w = 0.25 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
+				           F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = 0.5 * Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -276,10 +290,12 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_v = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* We set the boundary conditions for the north and west wall for u and the
 					    * south wall for v. We also solve v_star. */
@@ -295,10 +311,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 					   /* SPECIAL FOR U CASE BOTTOM */
 					   if(j==0){
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + 0.5 * u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i][j] );
-				           F_s = 0.25 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j+1] + v_velocity_old[i-1][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + 0.5 * u_velocity[i-1][j]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i][j] );
+				           F_s = 0.25 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = 0.5 * Gamma_constant/delta_y;
@@ -311,15 +327,17 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] + S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] + S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity: same as MIDDLE BOTTOM */
-						   F_w = 0.5 * density * u_velocity_old[i][j];
-				           F_e = 0.5 * density * u_velocity_old[i+1][j];
-				           F_s = 0.25 * density * v_velocity_old[i][j];
-				           F_n = 0.5 * density * ( 0.5 * v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+						   F_w = 0.5 * density * u_velocity[i][j];
+				           F_e = 0.5 * density * u_velocity[i+1][j];
+				           F_s = 0.25 * density * v_velocity[i][j];
+				           F_n = 0.5 * density * ( 0.5 * v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = 0.5 * Gamma_constant/delta_x;
 				           D_e = 0.5 * Gamma_constant/delta_x;
 				           D_s = 0.0;
@@ -332,16 +350,18 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + a_w * v_velocity_old[i-1][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* SPECIAL CASE FOR U TOP */
 					   else if (j==(Ny-1)){
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + 0.5 * u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i][j] );
-				           F_s = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + 0.5 * u_velocity[i-1][j]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i][j] );
+				           F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
 				           F_n = 0.0;
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
@@ -355,15 +375,17 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = ( D_n - F_n ) * lid_velocity;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] + S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] + S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity: same as MIDDLE TOP */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i+1][j-1]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + 0.5 * v_velocity_old[i][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
+				           F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + 0.5 * v_velocity[i][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -376,17 +398,19 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + a_w * v_velocity_old[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* SPECIAL CASE FOR U GENERAL */
 					   else {
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + 0.5 * u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i][j] );
-				           F_s = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j+1] + v_velocity_old[i-1][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + 0.5 * u_velocity[i-1][j]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i][j] );
+				           F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -399,16 +423,18 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity: same as MIDDLE MIDDLE */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i+1][j-1]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
+				           F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -421,10 +447,12 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + a_w * v_velocity_old[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
 					   u_star(i,(Ny-1)) = lid_velocity;
@@ -436,10 +464,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 					   /* EAST BOTTOM */
 					   if(j==0){
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * u_velocity_old[i][j];
-				           F_s = 0.25 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j+1] + v_velocity_old[i-1][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
+				           F_e = 0.5 * density * u_velocity[i][j];
+				           F_s = 0.25 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = 0.5 * Gamma_constant/delta_y;
@@ -452,15 +480,17 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
-				           b_u_velocity(j) = a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+				           b_u_velocity(j) = a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.5 * density * u_velocity_old[i][j];
+						   F_w = 0.5 * density * u_velocity[i][j];
 				           F_e = 0.0;
-				           F_s = 0.25 * density * v_velocity_old[i][j];
-				           F_n = 0.5 * density * ( 0.5 * v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+				           F_s = 0.25 * density * v_velocity[i][j];
+				           F_n = 0.5 * density * ( 0.5 * v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = 0.5 * Gamma_constant/delta_x;
 				           D_e = 0.25 * Gamma_constant/delta_x;
 				           D_s = 0.0;
@@ -473,17 +503,19 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
-				           b_v_velocity(j) = a_w * v_velocity_old[i-1][j] +  S_v;
+				           b_v_velocity(j) = a_w * v_velocity[i-1][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* SPECIAL CASE FOR V*/
 					   else if (j==1){
 						   /* Equations for u_velocity: same as EAST GENERAL */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i-1][j]);
-						   F_e = 0.5 * density * u_velocity_old[i][j];
-						   F_s = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
-						   F_n = 0.5 * density * (v_velocity_old[i][j+1] + v_velocity_old[i-1][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
+						   F_e = 0.5 * density * u_velocity[i][j];
+						   F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
+						   F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
 						   D_w = Gamma_constant/delta_x;
 						   D_e = Gamma_constant/delta_x;
 						   D_s = Gamma_constant/delta_y;
@@ -496,16 +528,18 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   S_u = 0.0;
 						   delta_F = F_e + F_n - F_s - F_w;
 						   a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+						   a_p = a_p/urfu;
 						   A_u_velocity(j,j) = a_p;
 						   A_u_velocity(j,j+1) = - a_n;
 						   A_u_velocity(j,j-1) = - a_s;
-						   b_u_velocity(j) = a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+						   b_u_velocity(j) = a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
 				           F_e = 0.0;
-				           F_s = 0.5 * density * ( 0.5 * v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+				           F_s = 0.5 * density * ( 0.5 * v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = 0.5 * Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -518,18 +552,20 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_w * v_velocity_old[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 
 					   }
 					   /* EAST TOP */
 					   else if (j==(Ny-1)){
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * u_velocity_old[i][j];
-				           F_s = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
+				           F_e = 0.5 * density * u_velocity[i][j];
+				           F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
 				           F_n = 0.0;
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
@@ -543,15 +579,17 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = ( D_n - F_n ) * lid_velocity;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+				           b_u_velocity(j) = a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
 				           F_e = 0.0;
-				           F_s = 0.5 * density * (v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * v_velocity_old[i][j];
+				           F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * v_velocity[i][j];
 				           D_w = Gamma_constant/delta_x;
 				           D_e = 0.5 * Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -564,17 +602,19 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_w * v_velocity_old[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* EAST GENERAL */
 					   else {
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * u_velocity_old[i][j];
-				           F_s = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j+1] + v_velocity_old[i-1][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
+				           F_e = 0.5 * density * u_velocity[i][j];
+				           F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -587,16 +627,18 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+				           b_u_velocity(j) = a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
 				           F_e = 0.0;
-				           F_s = 0.5 * density * (v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+				           F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = 0.5 * Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -609,10 +651,12 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_w * v_velocity_old[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
 					   u_star(i,(Ny-1)) = lid_velocity;
@@ -624,10 +668,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 					   /* MIDDLE BOTTOM */
 					   if(j==0){
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i][j]);
-				           F_s = 0.25 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j+1] + v_velocity_old[i-1][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i][j]);
+				           F_s = 0.25 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = 0.5 * Gamma_constant/delta_y;
@@ -640,15 +684,17 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.5 * density * u_velocity_old[i][j];
-				           F_e = 0.5 * density * u_velocity_old[i+1][j];
-				           F_s = 0.25 * density * v_velocity_old[i][j];
-				           F_n = 0.5 * density * ( 0.5 * v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+						   F_w = 0.5 * density * u_velocity[i][j];
+				           F_e = 0.5 * density * u_velocity[i+1][j];
+				           F_s = 0.25 * density * v_velocity[i][j];
+				           F_n = 0.5 * density * ( 0.5 * v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = 0.5 * Gamma_constant/delta_x;
 				           D_e = 0.5 * Gamma_constant/delta_x;
 				           D_s = 0.0;
@@ -661,17 +707,19 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + a_w * v_velocity_old[i-1][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* SPECIAL CASE FOR V*/
 					   else if (j==1){
 						   /* Equations for u_velocity: same as MIDDLE MIDDLE */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i][j]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j+1] + v_velocity_old[i-1][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i][j]);
+				           F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -684,16 +732,18 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i+1][j-1]);
-				           F_s = 0.5 * density * (0.5 * v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
+				           F_s = 0.5 * density * (0.5 * v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -706,17 +756,19 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + a_w * v_velocity_old[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* MIDDLE TOP */
 					   else if (j==(Ny-1)){
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i][j]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i][j]);
+				           F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
 				           F_n = 0.0;
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
@@ -730,15 +782,17 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = ( D_n - F_n ) * lid_velocity;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i+1][j-1]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + 0.5 * v_velocity_old[i][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
+				           F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + 0.5 * v_velocity[i][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -751,17 +805,19 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + a_w * v_velocity_old[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   /* MIDDLE MIDDLE */
 					   else {
 						   /* Equations for u_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i-1][j]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i][j]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i-1][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j+1] + v_velocity_old[i-1][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i][j]);
+				           F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -774,16 +830,18 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfu;
 				           A_u_velocity(j,j) = a_p;
 				           A_u_velocity(j,j+1) = - a_n;
 				           A_u_velocity(j,j-1) = - a_s;
-				           b_u_velocity(j) = a_e * u_velocity_old[i+1][j] + a_w * u_velocity_old[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u;
+				           b_u_velocity(j) = a_e * u_velocity[i+1][j] + a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+						   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
 
 				           /* Equations for v_velocity */
-						   F_w = 0.5 * density * ( u_velocity_old[i][j] + u_velocity_old[i][j-1]);
-				           F_e = 0.5 * density * ( u_velocity_old[i+1][j] + u_velocity_old[i+1][j-1]);
-				           F_s = 0.5 * density * (v_velocity_old[i][j-1] + v_velocity_old[i][j]);
-				           F_n = 0.5 * density * (v_velocity_old[i][j] + v_velocity_old[i][j+1]);
+						   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
+				           F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
+				           F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
+				           F_n = 0.5 * density * (v_velocity[i][j] + v_velocity[i][j+1]);
 				           D_w = Gamma_constant/delta_x;
 				           D_e = Gamma_constant/delta_x;
 				           D_s = Gamma_constant/delta_y;
@@ -796,10 +854,12 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           S_u = 0.0;
 				           delta_F = F_e + F_n - F_s - F_w;
 				           a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+				           a_p = a_p/urfv;
 				           A_v_velocity(j,j) = a_p;
 				           A_v_velocity(j,j+1) = - a_n;
 				           A_v_velocity(j,j-1) = - a_s;
-				           b_v_velocity(j) = a_e * v_velocity_old[i+1][j] + a_w * v_velocity_old[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v;
+				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 					   }
 					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
 					   u_star(i,(Ny-1)) = lid_velocity;
@@ -808,140 +868,6 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				   }
 			   }
 		   }
-
-
-//	   /* Solve the discretised momentum equation using the guessed values of
-//	    * velocity and pressure. The equation has the form:
-//	    *
-//	    * a_P * u_P^(*) = a_W * u_W^(*) + a_E * u_E^(*) + S_u
-//	    *
-//	    * where u is the velocity in the x-direction.
-//	    *
-//	    * */
-//
-//	   /* First we determine the values for the boundary nodes */
-//
-//
-//	//   /* For velocity node 1
-//	//    *
-//	//    * we use the upwind scheme and the
-//	//    * deferred correction approach, where the negative contribution to ap
-//	//    * is placed on the RHS and we use u1_old as the nodal velocity in the
-//	//    * previous iteration */
-//	//
-//	//   double F_e_x1;
-//	//   double F_w_x1;
-//	//   double a_p_x1;
-//	//   double Su_x1;
-//	//
-//	//   F_e_x1 = density * Area_pressure_node[1] * ( velocity[0] + velocity[1]) * 0.5;
-//	//   F_w_x1 = density * Area_velocity_node[0] * velocity[0];
-//	//
-//	//   a_p_x1 = (F_e_x1 + F_w_x1 * 0.5 * (Area_velocity_node[0]/Area_pressure_node[0]) * (Area_velocity_node[0]/Area_pressure_node[0]))/urfu;
-//	//   Su_x1 = (p_in - pressure[1]) * Area_velocity_node[0] + F_w_x1 * (Area_velocity_node[0]/Area_pressure_node[0]) * velocity_old[0] + (1.0 - urfu)*a_p_x1*velocity_old[0];
-//	//   dx[0] = Area_velocity_node[0]/a_p_x1;
-//
-//
-//	   /* For velocity node 1
-//	     *
-//	     * we use only the upwind scheme */
-//	    double F_e_x1;
-//	    double F_w_x1;
-//	    double a_p_x1;
-//	    double Su_x1;
-//
-//	    F_e_x1 = density * Area_pressure_node[1] * ( velocity[0] + velocity[1]) * 0.5;
-//	    //F_w_x1 = density * Area_velocity_node[0] * velocity[0]; /* BC suggested in Versteeg book */
-//	    F_w_x1 = density * Area_pressure_node[0] * (velocity[0] - (velocity[1] - velocity[0]) * 0.5); /* BC extrapolated from tendency of previous node */
-//
-//	    a_p_x1 = (F_e_x1 - F_w_x1 * (Area_velocity_node[0]/Area_pressure_node[0]) + F_w_x1 * 0.5 * (Area_velocity_node[0]/Area_pressure_node[0]) * (Area_velocity_node[0]/Area_pressure_node[0]) )/urfu;
-//	    Su_x1 = (p_in - pressure[1]) * Area_velocity_node[0] + (1.0 - urfu)*a_p_x1*velocity_old[0];
-//	    dx[0] = Area_velocity_node[0]/a_p_x1;
-//
-//
-//	   /* For velocity node Nx-1  */
-//	   double F_e_xNm1;
-//	   double F_w_xNm1;
-//	   double a_p_xNm1;
-//	   double a_w_xNm1;
-//	   double Su_xNm1;
-//
-//	   //F_e_xNm1 = density * Area_velocity_node[Nx-2] *  velocity[Nx-2]; /* BC suggested in Versteeg book */
-//	   F_e_xNm1 = density * Area_pressure_node[Nx-1] *  (velocity[Nx-2] - (velocity[Nx-3] - velocity[Nx-2]) * 0.5); /* BC extrapolated from tendency of previous node */
-//	   F_w_xNm1 = density * Area_pressure_node[Nx-2] * ( velocity[Nx-3] + velocity[Nx-2]) * 0.5;
-//	   a_p_xNm1 = F_e_xNm1/urfu;
-//	   a_w_xNm1 = F_w_xNm1;
-//	   Su_xNm1 = (pressure[Nx-2] - pressure[Nx-1]) * Area_velocity_node[Nx-2] + (1.0 - urfu)*a_p_xNm1*velocity_old[Nx-2];
-//	   dx[Nx-2] = Area_velocity_node[Nx-2]/a_p_xNm1;
-//
-//	   /* this is the matrix A that stores the a_p, a_w and a_e and the vector
-//	    * b that stores the S_u values to solve the system of equations for
-//	    * the velocities. The system of equations is given by the momentum
-//	    * equations. We solve the system A*u=b and the solutions of u are set to
-//	    * be the guessed velocities u=u*
-//	    */
-//	   MatrixXd A_velocity = MatrixXd::Zero(Nx-1,Nx-1);
-//	   VectorXd b_velocity = VectorXd::Zero(Nx-1);
-//
-//	   /* Setting the boundary nodes coefficients */
-//	   A_velocity(0,0) = a_p_x1;
-//	   b_velocity(0) = Su_x1;
-//
-//	   A_velocity(Nx-2,Nx-2) = a_p_xNm1;
-//	   A_velocity(Nx-2,Nx-3) = -a_w_xNm1;
-//	   b_velocity(Nx-2) = Su_xNm1;
-//
-//	   /* adding the values of the residuals of the momentum equations
-//	    * of boundaries */
-//	   x_momentum_residual_sum[i_iter] = abs(A_velocity(0,0)*velocity[0] + A_velocity(0,1)*velocity[1] - b_velocity[0]);
-//	   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_velocity(Nx-2,Nx-2)*velocity[Nx-2] + A_velocity(Nx-2,Nx-3)*velocity[Nx-3] - b_velocity[Nx-2]);
-//
-//	   /* For velocity nodes in between  */
-//	   /* i=1..Nx-3 */
-//	   double F_e_x;
-//	   double F_w_x;
-//	   double a_p_x;
-//	   double a_w_x;
-//	   double Su_x;
-//
-//	   for(int i=1; i<(Nx-2); i++){
-//
-//		  F_w_x = density * Area_pressure_node[i] * (velocity[i-1] + velocity[i]) * 0.5;
-//		  F_e_x = density * Area_pressure_node[i+1] * (velocity[i] + velocity[i+1]) * 0.5;
-//		  a_p_x = F_e_x/urfu;
-//		  a_w_x = F_w_x;
-//		  Su_x = (pressure[i] - pressure[i+1]) * Area_velocity_node[i] + (1.0 - urfu)*a_p_x*velocity_old[i];
-//		  dx[i] = Area_velocity_node[i]/a_p_x;
-//
-//		  A_velocity(i,i) = a_p_x;
-//		  A_velocity(i,i-1) = -a_w_x;
-//		  b_velocity(i) = Su_x;
-//
-//		  /* adding the values of the residuals of the momentum equations
-//		   * for the nodes in between */
-//		  x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_velocity(i,i)*velocity[i] + A_velocity(i,i+1)*velocity[i+1] + A_velocity(i,i-1)*velocity[i-1] - b_velocity[i]);
-//
-//
-//	   }
-//
-//
-//	  /* These are the guessed velocities (u_star*) obtained by solving the system of
-//	   * equations. */
-//	   u_star = A_velocity.colPivHouseholderQr().solve(b_velocity);
-//
-//	   //    	   if (i_iter == 0){
-//	   //
-//	   //    	   cout << "Momentum matrix A:" << endl;
-//	   //    	   cout << A_velocity << endl;
-//	   //    	   cout << endl;
-//	   //    	   cout << "Momentum source vector b:" << endl;
-//	   //    	   cout << b_velocity << endl;
-//	   //
-//	   //    	   }
-
-
-
-
 }
 
 
