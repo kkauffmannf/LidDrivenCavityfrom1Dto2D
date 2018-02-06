@@ -145,6 +145,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   A_v_velocity(j,j+1) = - a_n;
 						   b_v_velocity(j) = a_e * v_velocity[i+1][j] + S_v + (1 - urfv) * a_p * v_velocity_old[i][j];;
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+					       x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] - b_v_velocity[j]);
 					   }
 					   /* SPECIAL CASE FOR V*/
 					   /* This is a special case because for v velocity, F_s has a term
@@ -198,6 +202,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   /* WEST TOP */
 					   else if (j==(Ny-1)){
@@ -246,6 +254,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+					       x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   /* WEST GENERAL */
 					   else {
@@ -296,6 +308,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   /* We set the boundary conditions for the north and west wall for u and the
 					    * south wall for v. We also solve v_star. */
@@ -355,6 +371,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j+1) = - a_n;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+					       x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] - b_v_velocity[j]);
 					   }
 					   /* SPECIAL CASE FOR U TOP */
 					   else if (j==(Ny-1)){
@@ -403,6 +423,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+					       x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   /* SPECIAL CASE FOR U GENERAL */
 					   else {
@@ -453,6 +477,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
 					   u_star(i,(Ny-1)) = lid_velocity;
@@ -508,6 +536,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j+1) = - a_n;
 				           b_v_velocity(j) = a_w * v_velocity[i-1][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+					       x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] - b_v_velocity[j]);
 					   }
 					   /* SPECIAL CASE FOR V*/
 					   else if (j==1){
@@ -559,6 +591,9 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           b_v_velocity(j) = a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
 
+						   /* adding the values of the residuals of the momentum equations */
+						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   /* EAST TOP */
 					   else if (j==(Ny-1)){
@@ -607,6 +642,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+					       x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   /* EAST GENERAL */
 					   else {
@@ -657,6 +696,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
 					   u_star(i,(Ny-1)) = lid_velocity;
@@ -712,6 +755,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j+1) = - a_n;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+					       x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] - b_v_velocity[j]);
 					   }
 					   /* SPECIAL CASE FOR V*/
 					   else if (j==1){
@@ -762,6 +809,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   /* MIDDLE TOP */
 					   else if (j==(Ny-1)){
@@ -810,6 +861,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+					       x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   /* MIDDLE MIDDLE */
 					   else {
@@ -860,11 +915,23 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				           A_v_velocity(j,j-1) = - a_s;
 				           b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
 						   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+						   /* adding the values of the residuals of the momentum equations */
+						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
+					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
 					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
 					   u_star(i,(Ny-1)) = lid_velocity;
 					   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
 					   v_star(i,0) = 0.0;
+				   }
+
+				   /* keeping the highest residual, line by line (ith row) */
+				   if (x_momentum_residual_sum[i_iter] < x_momentum_residual_sum_prev[i_iter]) {
+					   x_momentum_residual_sum[i_iter]=x_momentum_residual_sum_prev[i_iter];
+				   }
+				   if (y_momentum_residual_sum[i_iter] < y_momentum_residual_sum_prev[i_iter]) {
+				       y_momentum_residual_sum[i_iter]=y_momentum_residual_sum_prev[i_iter];
 				   }
 			   }
 		   }
