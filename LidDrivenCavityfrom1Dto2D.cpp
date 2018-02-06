@@ -162,11 +162,11 @@ int main()
     * MatrixXD pressure_prime = vector<vector<double>> pressure */
    MatrixXd pressure_prime (pressure.size(), pressure[0].size());
 
-   /* cast unsigned int pressure.size to int to be able to compare */
-   int signedIntsize = (int) pressure.size();
-   for (int i = 0; i < signedIntsize; ++i){
-       pressure_prime.row(i) = VectorXd::Map(&pressure[i][0], pressure[0].size());
-   }
+//   /* cast unsigned int pressure.size to int to be able to compare */
+//   int signedIntsize = (int) pressure.size();
+//   for (int i = 0; i < signedIntsize; ++i){
+//       pressure_prime.row(i) = VectorXd::Map(&pressure[i][0], pressure[0].size());
+//   }
    pressure_correction_equation_solve(u_star,v_star, pressure_prime,i_iter);
 
    ///////////////////////////////////////////////////////////////////////////////////////
