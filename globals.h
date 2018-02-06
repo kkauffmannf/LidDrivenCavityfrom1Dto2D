@@ -62,7 +62,7 @@ extern std::vector<double> pressure_residual_sum; /* sum of the residuals of the
 void readinput();
 void initialization();
 void plotcolormap();
-//void plotresiduals();
+void plotresiduals();
 void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter);
 void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, MatrixXd &pressure_prime, int i_iter);
 //void correct_pressure_and_velocities(VectorXd u_star,VectorXd pressure_prime);

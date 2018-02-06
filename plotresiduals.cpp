@@ -64,6 +64,6 @@ void plotresiduals()
 	gp << "plot " << gp.file1d(values) << "u 1:2 w lp title 'x-momentum', " << gp.file1d(values) << "u 1:3 w lp title 'pressure'\n";
 
     //Generates pdf figure
-	gp << "set term pdf\nset output 'momentumresidual.pdf'\nreplot\nset term x11" << endl;
+//	gp << "set term pdf\nset output 'momentumresidual.pdf'\nreplot\nset term x11" << endl;
 
 }

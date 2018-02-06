@@ -213,11 +213,11 @@ int main()
 //              underrelaxation();
 //
 //
-//         /* Prints out the residuals */
-//	     cout << i_iter << "\t" << x_momentum_residual_sum[i_iter] << "\t" << pressure_residual_sum[i_iter] << endl;
-//
-//	     /* Advancing the iteration number */
-//	     i_iter++;
+         /* Prints out the residuals */
+	     cout << i_iter << "\t" << x_momentum_residual_sum[i_iter] <<  "\t" << y_momentum_residual_sum[i_iter] << "\t" << pressure_residual_sum[i_iter] << endl;
+
+	     /* Advancing the iteration number */
+	     i_iter++;
 //
 //	 /*************************** */
 //
@@ -235,8 +235,8 @@ int main()
      plotcolormap();
 
 
-//     /* Residuals vs iterations */
-//     plotresiduals();
+     /* Residuals vs iterations */
+     plotresiduals();
 
      /* Ending the execution and printing the execution time */
      high_resolution_clock::time_point t2 = high_resolution_clock::now();
