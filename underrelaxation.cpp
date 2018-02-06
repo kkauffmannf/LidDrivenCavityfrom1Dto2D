@@ -18,14 +18,23 @@
 
 using namespace std;
 
-void underrelaxation()
+void underrelaxation(MatrixXd pressure_prime)
 {
-//	      /* The underrelaxation imposes */
-//	      for(int i=0;i<(Nx-1);i++){
-//	          	velocity[i] = (1.0-urfu)*velocity_old[i] + urfu*velocity[i];
-//	      }
-//
-//	      for(int i=0;i<Nx;i++){
-//	          	pressure[i] = (1.0-urfp)*pressure_old[i] + urfp*pressure[i];
-//	      }
+	      /* The underrelaxation imposes */
+	      for(int i=0;i<Nx;i++){
+	    	  for(int j=0;j<Ny;j++){
+	    		  u_velocity[i][j] = (1.0-urfu)*u_velocity_old[i][j] + urfu * u_velocity[i][j];
+	    		  if (j!=(Ny-1)){
+	                  u_velocity[0][j] = 0.0;
+	    		  }
+
+	    		  v_velocity[i][j] = (1.0-urfv)*v_velocity_old[i][j] + urfv * v_velocity[i][j];
+	    		  v_velocity[i][0] = 0.0;
+	    		  v_velocity[(Nx-1)][j] = 0.0;
+
+	    		  pressure[i][j] = (1.0-urfp)*pressure_old[i][j] + urfp*pressure_prime(i,j);
+
+	    	  }
+	    	  u_velocity[i][(Ny-1)] = lid_velocity;
+	      }
 }

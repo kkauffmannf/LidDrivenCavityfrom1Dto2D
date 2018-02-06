@@ -66,4 +66,4 @@ void plotresiduals();
 void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter);
 void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, MatrixXd &pressure_prime, int i_iter);
 void correct_pressure_and_velocities(MatrixXd u_star, MatrixXd v_star, MatrixXd pressure_prime);
-void underrelaxation();
+void underrelaxation(MatrixXd pressure_prime);

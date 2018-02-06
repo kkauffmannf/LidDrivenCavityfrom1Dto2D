@@ -36,8 +36,8 @@ void correct_pressure_and_velocities(MatrixXd u_star, MatrixXd v_star, MatrixXd 
 					  u_velocity[i][j] = u_star(i,j);
 					  v_velocity[i][j] = v_star(i,j) + d_v[i][j] * ( pressure_prime(i,(j-1)) - pressure_prime(i,j) );
 				  }
-				  /* west boundary */
-				  u_velocity[0][j] = 0.0;
+//				  /* west boundary */
+//				  u_velocity[0][j] = 0.0;
 			  }
 			  else {
 				  if (j==0){
@@ -48,12 +48,12 @@ void correct_pressure_and_velocities(MatrixXd u_star, MatrixXd v_star, MatrixXd 
 					  u_velocity[i][j] = u_star(i,j) + d_u[i][j] * ( pressure_prime((i-1),j) - pressure_prime(i,j) );
 					  v_velocity[i][j] = v_star(i,j) + d_v[i][j] * ( pressure_prime(i,(j-1)) - pressure_prime(i,j) );
 				  }
-				  /* east boundary */
-				  v_velocity[(Nx-1)][j] = 0.0;
+//				  /* east boundary */
+//				  v_velocity[(Nx-1)][j] = 0.0;
 			  }
-			  /* south and north boundary */
-			  v_velocity[i][0] = 0.0;
-			  u_velocity[i][(Ny-1)] = lid_velocity;
+//			  /* south and north boundary */
+//			  v_velocity[i][0] = 0.0;
+//			  u_velocity[i][(Ny-1)] = lid_velocity;
 		  }
 	  }
 

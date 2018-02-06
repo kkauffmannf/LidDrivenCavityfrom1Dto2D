@@ -176,15 +176,14 @@ int main()
    correct_pressure_and_velocities(u_star,v_star,pressure_prime);
 
    /* We apply the underrelaxation factors for velocity and pressure */
-   underrelaxation();
-//
-//
-//
-//
-//
+   underrelaxation(pressure_prime);
+
+
+
+
+
 //      /* Start next iteration until the residuals are lower than the threshold */
-//      while( (x_momentum_residual_sum[i_iter] > residual_threshold) || (pressure_residual_sum[i_iter] > residual_threshold) ) {
-//
+//      while( (x_momentum_residual_sum[i_iter] > residual_threshold) || (y_momentum_residual_sum[i_iter] > residual_threshold) || (pressure_residual_sum[i_iter] > residual_threshold) ) {
 //
 //    	      /* the new velocities and pressures are the old ones in the next iteration */
 //    	      for(int i=0;i<(Nx-1);i++){
@@ -218,10 +217,10 @@ int main()
 
 	     /* Advancing the iteration number */
 	     i_iter++;
-//
-//	 /*************************** */
-//
-//
+
+	 /*************************** */
+
+
 //      }
 //
 //      /* print out the position, the velocity and pressure */
