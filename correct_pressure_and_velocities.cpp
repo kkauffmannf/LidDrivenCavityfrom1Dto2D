@@ -18,25 +18,45 @@
 
 using namespace std;
 
-void correct_pressure_and_velocities(VectorXd u_star, VectorXd pressure_prime)
+void correct_pressure_and_velocities(MatrixXd u_star, MatrixXd v_star, MatrixXd pressure_prime)
 {
 
-	   /* We set the new values for the pressures due to the corrections */
-	   /* For the boundary nodes */
-	      pressure[0] = p_in - 0.5*density*u_star[0]*u_star[0]*(Area_velocity_node[0]/Area_pressure_node[0]) * (Area_velocity_node[0]/Area_pressure_node[0]);
-	      pressure[Nx-1] = pressure[Nx-1] + pressure_prime[Nx-1];
+	  /* We set the new values for the pressures due to the corrections */
 
-	      /* For the nodes in between */
-	      for(int i=1;i<(Nx-1);i++){
-	          pressure[i] = pressure[i] + pressure_prime[i];
-	      }
+	  for(int i=0;i<Nx;i++){
+		  for(int j=0;j<Ny;j++){
+			  pressure[i][j] = pressure[i][j] + pressure_prime(i,j);
+			  /* The corrected velocities are */
+			  if (i==0){
+				  if (j==0){
+					  u_velocity[i][j] = 0.0;
+					  v_velocity[i][j] = v_star(i,j);
+				  }
+				  else {
+					  u_velocity[i][j] = u_star(i,j);
+					  v_velocity[i][j] = v_star(i,j) + d_v[i][j] * ( pressure_prime(i,(j-1)) - pressure_prime(i,j) );
+				  }
+				  /* west boundary */
+				  u_velocity[0][j] = 0.0;
+			  }
+			  else {
+				  if (j==0){
+					  u_velocity[i][j] = u_star(i,j) + d_u[i][j] * ( pressure_prime((i-1),j) - pressure_prime(i,j) );
+					  v_velocity[i][j] = v_star(i,j);
+				  }
+				  else {
+					  u_velocity[i][j] = u_star(i,j) + d_u[i][j] * ( pressure_prime((i-1),j) - pressure_prime(i,j) );
+					  v_velocity[i][j] = v_star(i,j) + d_v[i][j] * ( pressure_prime(i,(j-1)) - pressure_prime(i,j) );
+				  }
+				  /* east boundary */
+				  v_velocity[(Nx-1)][j] = 0.0;
+			  }
+			  /* south and north boundary */
+			  v_velocity[i][0] = 0.0;
+			  u_velocity[i][(Ny-1)] = lid_velocity;
+		  }
+	  }
 
-	      /* The corrected velocities are */
-	      for(int i=0;i<(Nx-1);i++){
-	    	  velocity[i] = u_star[i] + dx[i]*(pressure_prime[i] - pressure_prime[i+1]);
-	      }
-
-	      /* The corrected nodal pressure for the first node is */
-	      pressure[0] = p_in - 0.5*density*velocity[0]*velocity[0]*(Area_velocity_node[0]/Area_pressure_node[0]) * (Area_velocity_node[0]/Area_pressure_node[0]);
-
+	  /* For the bottom west corner we set it constant */
+	  pressure[0][0] = p_init;
 }

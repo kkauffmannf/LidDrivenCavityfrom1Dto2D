@@ -20,12 +20,12 @@ using namespace std;
 
 void underrelaxation()
 {
-	      /* The underrelaxation imposes */
-	      for(int i=0;i<(Nx-1);i++){
-	          	velocity[i] = (1.0-urfu)*velocity_old[i] + urfu*velocity[i];
-	      }
-
-	      for(int i=0;i<Nx;i++){
-	          	pressure[i] = (1.0-urfp)*pressure_old[i] + urfp*pressure[i];
-	      }
+//	      /* The underrelaxation imposes */
+//	      for(int i=0;i<(Nx-1);i++){
+//	          	velocity[i] = (1.0-urfu)*velocity_old[i] + urfu*velocity[i];
+//	      }
+//
+//	      for(int i=0;i<Nx;i++){
+//	          	pressure[i] = (1.0-urfp)*pressure_old[i] + urfp*pressure[i];
+//	      }
 }

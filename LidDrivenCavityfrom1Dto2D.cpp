@@ -170,13 +170,13 @@ int main()
 
    ///////////////////////////////////////////////////////////////////////////////////////
 
-//
-//   /* We have the velocities from the momentum equation and the pressures corrections,
-//    * so we now proceed to correct the pressure and velocities  */
-//   correct_pressure_and_velocities(u_star,pressure_prime);
-//
-//   /* We apply the underrelaxation factors for velocity and pressure */
-//   underrelaxation();
+
+   /* We have the velocities from the momentum equation and the pressures corrections,
+    * so we now proceed to correct the pressure and velocities  */
+   correct_pressure_and_velocities(u_star,v_star,pressure_prime);
+
+   /* We apply the underrelaxation factors for velocity and pressure */
+   underrelaxation();
 //
 //
 //
