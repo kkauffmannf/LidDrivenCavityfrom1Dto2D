@@ -78,7 +78,8 @@ vector<vector<double>> d_v; /* parameter d for the pressure correction equation 
 
 /* Variables used for the iterations */
 int i_iter = 0; /* number of iterations */
-int MAX_ITER = 1000000; /* set the maximum number of iterations to store in the residual vector */
+//int MAX_ITER = 1000000; /* set the maximum number of iterations to store in the residual vector */
+int MAX_ITER = 1000; /* set the maximum number of iterations to store in the residual vector */
 vector<double> x_momentum_residual_sum; /* sum of the residuals of the x-momentum equation per iteration*/
 vector<double> y_momentum_residual_sum; /* sum of the residuals of the y-momentum equation per iteration*/
 vector<double> pressure_residual_sum; /* sum of the residuals of the pressure equation per iteration*/
@@ -182,47 +183,50 @@ int main()
 
 
 
-//      /* Start next iteration until the residuals are lower than the threshold */
-//      while( (x_momentum_residual_sum[i_iter] > residual_threshold) || (y_momentum_residual_sum[i_iter] > residual_threshold) || (pressure_residual_sum[i_iter] > residual_threshold) ) {
-//
-//    	      /* the new velocities and pressures are the old ones in the next iteration */
-//    	      for(int i=0;i<(Nx-1);i++){
-//    	         velocity_old[i] = velocity[i];
-//    	      }
-//
-//    	      for(int i=0;i<Nx;i++){
-//    	         pressure_old[i] = pressure[i];
-//    	      }
-//
-//
-//    	      /* Solving the momentum equation */
-//    	      VectorXd u_star;
-//              momentum_equation_solve(u_star,(i_iter + 1));
-//
-//
-//              /* Solving the pressure equation */
-//              pressure_correction_equation_solve(u_star,pressure_prime,(i_iter + 1));
-//
-//
-//              /* Correcting the pressure and velocity */
-//              correct_pressure_and_velocities(u_star,pressure_prime);
-//
-//
-//              /* Applying the underrelaxation factor */
-//              underrelaxation();
-//
-//
+      /* Start next iteration until the residuals are lower than the threshold */
+      while((i_iter < MAX_ITER) && ((x_momentum_residual_sum[i_iter] > residual_threshold) || (y_momentum_residual_sum[i_iter] > residual_threshold) || (pressure_residual_sum[i_iter] > residual_threshold)) ) {
+
+    	      /* the new velocities and pressures are the old ones in the next iteration */
+    	      for(int i=0;i<Nx;i++){
+    	    	  for(int j=0;j<Ny;j++){
+    	    		  u_velocity_old[i][j] = u_velocity[i][j];
+    	    		  v_velocity_old[i][j] = v_velocity[i][j];
+    	    		  pressure_old[i][j] = pressure[i][j];
+    	    	  }
+    	      }
+
+    	      /* Solving the momentum equation */
+    	      u_star=MatrixXd::Zero(Nx,Ny);
+    	      v_star=MatrixXd::Zero(Nx,Ny);
+              momentum_equation_solve(u_star,v_star,(i_iter + 1));
+
+
+              /* Solving the pressure equation */
+              pressure_correction_equation_solve(u_star,v_star,pressure_prime,(i_iter + 1));
+
+
+              /* Correcting the pressure and velocity */
+              correct_pressure_and_velocities(u_star,v_star,pressure_prime);
+
+
+              /* Applying the underrelaxation factor */
+              underrelaxation(pressure_prime);
+
+
          /* Prints out the residuals */
 	     cout << i_iter << "\t" << x_momentum_residual_sum[i_iter] <<  "\t" << y_momentum_residual_sum[i_iter] << "\t" << pressure_residual_sum[i_iter] << endl;
 
 	     /* Advancing the iteration number */
 	     i_iter++;
+	     if (i_iter==MAX_ITER){
+	    	 cout << "The program has reached the maximum of iterations allowed" << endl;
+	     }
 
 	 /*************************** */
 
 
-//      }
-//
+      }
+
 //      /* print out the position, the velocity and pressure */
 //      cout << endl;
 //      cout << "# position" << "\t" << "velocity" << "\t" << "pressure" << endl;
