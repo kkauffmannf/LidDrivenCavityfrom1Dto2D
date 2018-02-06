@@ -30,13 +30,14 @@ void plotresiduals()
 	Gnuplot gp;
 
 	// vector that stores the values of the residual
-	vector< vector<double> > values(i_iter,vector<double>(3));
+	vector< vector<double> > values(i_iter,vector<double>(4));
 
 	for(int counter1=0;counter1<i_iter;counter1++) {
 
 	 	values[counter1][0]= counter1;
 	 	values[counter1][1]= x_momentum_residual_sum[counter1];
-	 	values[counter1][2]= pressure_residual_sum[counter1];
+	 	values[counter1][2]= y_momentum_residual_sum[counter1];
+	 	values[counter1][3]= pressure_residual_sum[counter1];
 
 	}
 
@@ -61,7 +62,7 @@ void plotresiduals()
 	gp << "set format y '10^{%L}'\n";
 
 	/* plotting the values */
-	gp << "plot " << gp.file1d(values) << "u 1:2 w lp title 'x-momentum', " << gp.file1d(values) << "u 1:3 w lp title 'pressure'\n";
+	gp << "plot " << gp.file1d(values) << "u 1:2 w lp title 'u-momentum', " << gp.file1d(values) << "u 1:3 w lp title 'v-momentum', " << gp.file1d(values) << "u 1:4 w lp title 'pressure'\n";
 
     //Generates pdf figure
 //	gp << "set term pdf\nset output 'momentumresidual.pdf'\nreplot\nset term x11" << endl;

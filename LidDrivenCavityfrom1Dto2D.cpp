@@ -137,15 +137,15 @@ int main()
    v_star=MatrixXd::Zero(Nx,Ny);
    momentum_equation_solve(u_star, v_star, i_iter);
 
-   cout << u_star << endl;
-   cout << v_star << endl;
-
-   for(int i=0;i<Nx;i++){
-	   for(int j=0;j<Ny;j++){
-		   u_velocity[i][j]=u_star(i,j);
-		   v_velocity[i][j]=v_star(i,j);
-	   }
-   }
+//   cout << u_star << endl;
+//   cout << v_star << endl;
+//
+//   for(int i=0;i<Nx;i++){
+//	   for(int j=0;j<Ny;j++){
+//		   u_velocity[i][j]=u_star(i,j);
+//		   v_velocity[i][j]=v_star(i,j);
+//	   }
+//   }
 
 
    //////////////////////////////////////////////////////////////////////////////

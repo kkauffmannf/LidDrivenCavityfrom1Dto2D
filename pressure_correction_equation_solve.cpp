@@ -73,6 +73,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j) = a_p;
 						   A_pressure(j,j+1) = - a_n;
 						   b_pressure(j) = a_e * pressure_prime((i+1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) - b_pressure[j]);
 					   }
 					   /* WEST TOP */
 		               else if (j==(Ny-1)){
@@ -85,6 +86,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j) = a_p;
 						   A_pressure(j,j-1) = - a_s;
 						   b_pressure(j) = a_e * pressure_prime((i+1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 		               }
 					   /* WEST GENERAL */
 		               else {
@@ -98,6 +100,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j+1) = - a_n;
 						   A_pressure(j,j-1) = - a_s;
 						   b_pressure(j) = a_e * pressure_prime((i+1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 		               }
 					   /* We also solve pressure_prime */
 					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
@@ -115,6 +118,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j) = a_p;
 						   A_pressure(j,j+1) = - a_n;
 						   b_pressure(j) = a_w * pressure_prime((i-1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) - b_pressure[j]);
 					   }
 					   /* EAST TOP */
 					   else if (j==(Ny-1)){
@@ -127,6 +131,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j) = a_p;
 						   A_pressure(j,j-1) = - a_s;
 						   b_pressure(j) = a_w * pressure_prime((i-1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 					   }
 					   /* EAST GENERAL */
 					   else {
@@ -140,6 +145,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j+1) = - a_n;
 						   A_pressure(j,j-1) = - a_s;
 						   b_pressure(j) = a_w * pressure_prime((i-1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 					   }
 					   /* We also solve pressure_prime */
 					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
@@ -157,6 +163,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j) = a_p;
 						   A_pressure(j,j+1) = - a_n;
 						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) - b_pressure[j]);
 					   }
 					   /* MIDDLE TOP */
 					   else if (j==(Ny-1)){
@@ -169,6 +176,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j) = a_p;
 						   A_pressure(j,j-1) = - a_s;
 						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 					   }
 					   /* MIDDLE MIDDLE */
 					   else {
@@ -182,9 +190,14 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   A_pressure(j,j+1) = - a_n;
 						   A_pressure(j,j-1) = - a_s;
 						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 					   }
 					   /* We also solve pressure_prime */
 					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
+				   }
+				   /* keeping the highest residual, line by line (ith row) */
+				   if (pressure_residual_sum[i_iter] < pressure_residual_sum_prev[i_iter]) {
+					   pressure_residual_sum[i_iter]=pressure_residual_sum_prev[i_iter];
 				   }
 			   }
 		   }
