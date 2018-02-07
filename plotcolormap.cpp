@@ -47,8 +47,8 @@ void plotcolormap()
 	   for(int counter2=0;counter2<Nx;counter2++){
 		   velocities[index][0]=position_v_velocity_node_y[counter1];
 		   velocities[index][1]=position_u_velocity_node_x[counter2];
-//		   velocities[index][2]=sqrt(u_velocity[counter2][counter1]*u_velocity[counter2][counter1] + v_velocity[counter2][counter1]*v_velocity[counter2][counter1]);
-		   velocities[index][2]=pressure[counter2][counter1];
+		   velocities[index][2]=sqrt(u_velocity[counter2][counter1]*u_velocity[counter2][counter1] + v_velocity[counter2][counter1]*v_velocity[counter2][counter1]);
+//		   velocities[index][2]=pressure[counter2][counter1];
 		   index++;
        }
    }
@@ -76,8 +76,8 @@ void plotcolormap()
 	gp << "unset key\n";
 
 	//set ranges
-	gp << "set xrange[0.0:" << Lx << "]\n";
-	gp << "set yrange[0.0:" << Ly << "]\n";
+	gp << "set xrange[-1.0:" << 2*Lx << "]\n";
+	gp << "set yrange[-1.0:" << 2*Ly << "]\n";
 
 //	//plot with contours
 ////	gp << "set parametric\n";

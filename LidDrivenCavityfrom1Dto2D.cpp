@@ -68,7 +68,6 @@ vector<double> position_u_velocity_node_x; /* position of the u velocity nodes i
 vector<double> position_u_velocity_node_y; /* position of the u velocity nodes in y */
 vector<double> position_v_velocity_node_x; /* position of the v velocity nodes in x */
 vector<double> position_v_velocity_node_y; /* position of the v velocity nodes in y */
-vector<vector<double>> Area_pressure_node; /* Cross-section for the pressure nodes */
 vector<vector<double>> Area_velocity_node_u; /* Cross-section for the velocity nodes for u velocity with (i,J) indexes */
 vector<vector<double>> Area_velocity_node_v; /* Cross-section for the velocity nodes for v velocity with (I,j) indexes */
 vector<vector<double>> u_velocity; /* velocity in the x direction */
@@ -104,13 +103,14 @@ int main()
 
    /* Physical quantities vector size definition. They are resized here because they depend on the input value of N.
     * Pressure and velocity nodes vectors have different lengths because a staggered grid is used  */
+   Nx = Nodesx + 2*ngcx; /* number of node plus guard cells in the x direction */
+   Ny = Nodesy + 2*ngcy;
    position_pressure_node_x.resize(Nx);
    position_pressure_node_y.resize(Ny);
    position_u_velocity_node_x.resize(Nx);
    position_u_velocity_node_y.resize(Ny);
    position_v_velocity_node_x.resize(Nx);
    position_v_velocity_node_y.resize(Ny);
-   Area_pressure_node.resize(Nx,vector<double>(Ny));
    Area_velocity_node_u.resize(Nx,vector<double>(Ny));
    Area_velocity_node_v.resize(Nx,vector<double>(Ny));
    u_velocity.resize(Nx,vector<double>(Ny));
@@ -131,6 +131,8 @@ int main()
    /* Initializes the variables */
    initialization();
 
+   /* Imposes the boundary conditions on u_velocity and v_velocity guard cells */
+   boundary_conditions();
 
    /* We obtain the guessed velocities (u_star*) by solving the system of
 	* momentum equations. */
@@ -145,28 +147,32 @@ int main()
 //   cout << u_star << endl;
 //   cout << v_star << endl;
 
-//   for(int i=0;i<Nx;i++){
-//	   for(int j=0;j<Ny;j++){
-//		   cout << u_velocity[i][j] << "   ";
-//	   }
-//	   cout << endl;
-//   }
-//   cout << endl;
-//
-//   for(int i=0;i<Nx;i++){
-//	   for(int j=0;j<Ny;j++){
-//		   cout << v_velocity[i][j] << "   ";
-//	   }
-//	   cout << endl;
-//   }
-//   cout << endl;
-//
-//   for(int i=0;i<Nx;i++){
-//	   for(int j=0;j<Ny;j++){
-//		   u_velocity[i][j]=u_star(i,j);
-//		   v_velocity[i][j]=v_star(i,j);
-//	   }
-//   }
+
+   /* Imposes the boundary conditions on u_velocity and v_velocity guard cells */
+   boundary_conditions();
+
+////   for(int i=0;i<Nx;i++){
+////	   for(int j=0;j<Ny;j++){
+////		   cout << u_velocity[i][j] << "   ";
+////	   }
+////	   cout << endl;
+////   }
+////   cout << endl;
+////
+////   for(int i=0;i<Nx;i++){
+////	   for(int j=0;j<Ny;j++){
+////		   cout << v_velocity[i][j] << "   ";
+////	   }
+////	   cout << endl;
+////   }
+////   cout << endl;
+////
+////   for(int i=0;i<Nx;i++){
+////	   for(int j=0;j<Ny;j++){
+////		   u_velocity[i][j]=u_star(i,j);
+////		   v_velocity[i][j]=v_star(i,j);
+////	   }
+////   }
 
 
    //////////////////////////////////////////////////////////////////////////////
@@ -182,11 +188,11 @@ int main()
     * MatrixXD pressure_prime = vector<vector<double>> pressure */
    MatrixXd pressure_prime (pressure.size(), pressure[0].size());
 
-//   /* cast unsigned int pressure.size to int to be able to compare */
-//   int signedIntsize = (int) pressure.size();
-//   for (int i = 0; i < signedIntsize; ++i){
-//       pressure_prime.row(i) = VectorXd::Map(&pressure[i][0], pressure[0].size());
-//   }
+   /* cast unsigned int pressure.size to int to be able to compare */
+   int signedIntsize = (int) pressure.size();
+   for (int i = 0; i < signedIntsize; ++i){
+       pressure_prime.row(i) = VectorXd::Map(&pressure[i][0], pressure[0].size());
+   }
    pressure_correction_equation_solve(u_star,v_star, pressure_prime,i_iter);
 
    ///////////////////////////////////////////////////////////////////////////////////////
@@ -195,29 +201,16 @@ int main()
     * so we now proceed to correct the pressure and velocities  */
    correct_pressure_and_velocities(u_star,v_star,pressure_prime);
 
-   for(int i=0;i<Nx;i++){
-	   for(int j=0;j<Ny;j++){
-		   cout << u_velocity[i][j] << "   ";
-	   }
-	   cout << endl;
-   }
-   cout << endl;
+   /* Imposes the boundary conditions on u_velocity and v_velocity guard cells */
+   boundary_conditions();
 
-   for(int i=0;i<Nx;i++){
-	   for(int j=0;j<Ny;j++){
-		   cout << v_velocity[i][j] << "   ";
-	   }
-	   cout << endl;
-   }
-   cout << endl;
-
-   /* We apply the underrelaxation factors for velocity and pressure */
-//   underrelaxation(pressure_prime);
-
-
-
-
-
+//   /* We apply the underrelaxation factors for velocity and pressure */
+////   underrelaxation(pressure_prime);
+//
+//
+//
+//
+//
       /* Start next iteration until the residuals are lower than the threshold */
       while((i_iter < MAX_ITER) && ((x_momentum_residual_sum[i_iter] > residual_threshold) || (y_momentum_residual_sum[i_iter] > residual_threshold) || (pressure_residual_sum[i_iter] > residual_threshold)) ) {
 
@@ -234,47 +227,16 @@ int main()
 //    	      u_star=MatrixXd::Zero(Nx,Ny);
 //    	      v_star=MatrixXd::Zero(Nx,Ny);
               momentum_equation_solve(u_star,v_star,(i_iter + 1));
-
-              for(int i=0;i<Nx;i++){
-           	   for(int j=0;j<Ny;j++){
-           		   cout << u_velocity[i][j] << "   ";
-           	   }
-           	   cout << endl;
-              }
-              cout << endl;
-
-              for(int i=0;i<Nx;i++){
-           	   for(int j=0;j<Ny;j++){
-           		   cout << v_velocity[i][j] << "   ";
-           	   }
-           	   cout << endl;
-              }
-              cout << endl << "jaja";
+              boundary_conditions();
 
               pressure_prime=MatrixXd::Zero(Nx,Ny);
+
               /* Solving the pressure equation */
               pressure_correction_equation_solve(u_star,v_star,pressure_prime,(i_iter + 1));
 
-
               /* Correcting the pressure and velocity */
               correct_pressure_and_velocities(u_star,v_star,pressure_prime);
-
-              for(int i=0;i<Nx;i++){
-           	   for(int j=0;j<Ny;j++){
-           		   cout << u_velocity[i][j] << "   ";
-           	   }
-           	   cout << endl;
-              }
-              cout << endl;
-
-              for(int i=0;i<Nx;i++){
-           	   for(int j=0;j<Ny;j++){
-           		   cout << v_velocity[i][j] << "   ";
-           	   }
-           	   cout << endl;
-              }
-              cout << endl;
-
+              boundary_conditions();
 
               /* Applying the underrelaxation factor */
  //             underrelaxation(pressure_prime);
@@ -291,14 +253,14 @@ int main()
 
 	 /*************************** */
       }
-
-//      /* print out the position, the velocity and pressure */
-//      cout << endl;
-//      cout << "# position" << "\t" << "velocity" << "\t" << "pressure" << endl;
-//      for(int i=0;i<(Nx-1);i++){
-//    	  cout << position_velocity_node[i] << "\t" << velocity[i] << "\t" << pressure[i] << endl;
-//   	      }
-
+//
+////      /* print out the position, the velocity and pressure */
+////      cout << endl;
+////      cout << "# position" << "\t" << "velocity" << "\t" << "pressure" << endl;
+////      for(int i=0;i<(Nx-1);i++){
+////    	  cout << position_velocity_node[i] << "\t" << velocity[i] << "\t" << pressure[i] << endl;
+////   	      }
+//
      /* color map of the velocities in 1 D */
      plotcolormap();
 

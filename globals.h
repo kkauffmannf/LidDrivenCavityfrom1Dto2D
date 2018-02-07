@@ -43,7 +43,6 @@ extern std::vector<double> position_u_velocity_node_x; /* position of the u velo
 extern std::vector<double> position_u_velocity_node_y; /* position of the u velocity nodes in y */
 extern std::vector<double> position_v_velocity_node_x; /* position of the v velocity nodes in x */
 extern std::vector<double> position_v_velocity_node_y; /* position of the v velocity nodes in y */
-extern std::vector<std::vector<double>> Area_pressure_node; /* Cross-section for the pressure nodes */
 extern std::vector<std::vector<double>> Area_velocity_node_u; /* Cross-section for the velocity nodes for u velocity with (i,J) indexes */
 extern std::vector<std::vector<double>> Area_velocity_node_v; /* Cross-section for the velocity nodes for v velocity with (I,j) indexes */
 extern std::vector<std::vector<double>> u_velocity; /* velocity in the x direction */
@@ -65,9 +64,10 @@ extern std::vector<double> pressure_residual_sum; /* sum of the residuals of the
 /* Modules external to main */
 void readinput();
 void initialization();
+void boundary_conditions();
 void plotcolormap();
 void plotresiduals();
 void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter);
 void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, MatrixXd &pressure_prime, int i_iter);
 void correct_pressure_and_velocities(MatrixXd u_star, MatrixXd v_star, MatrixXd pressure_prime);
-void underrelaxation(MatrixXd pressure_prime);
+//void underrelaxation(MatrixXd pressure_prime);

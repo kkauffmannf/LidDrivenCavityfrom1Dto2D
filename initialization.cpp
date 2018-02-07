@@ -38,31 +38,31 @@ void initialization()
 
 		   /* initialize values of the position of the pressure and velocity nodes.
 		    * It is a uniform grid. */
-		   double delta_x = Lx/(Nx-0.5); /* spacing of the grid in x (uniform grid) */
-		   double delta_y = Ly/(Ny-0.5); /* spacing of the grid in y (uniform grid) */
+		   double delta_x = Lx/(Nodesx-0.5); /* spacing of the grid in x (uniform grid) */
+		   double delta_y = Ly/(Nodesy-0.5); /* spacing of the grid in y (uniform grid) */
 
 		   for (int i=0;i<Nx;i++) {
-		   	   position_pressure_node_x[i] = delta_x*(i+0.5);
+		   	   position_pressure_node_x[i] = delta_x*((i-ngcx)+0.5);
 		   }
 
 		   for (int j=0;j<Ny;j++) {
-		   	   position_pressure_node_y[j] = delta_y*(j+0.5);
+		   	   position_pressure_node_y[j] = delta_y*((j-ngcy)+0.5);
 		   }
 
 		   for (int i=0;i<Nx;i++) {
-		       position_u_velocity_node_x[i] = delta_x*i;
+		       position_u_velocity_node_x[i] = delta_x*(i-ngcx);
 		      }
 
 		   for (int j=0;j<Ny;j++) {
-		       position_u_velocity_node_y[j] = delta_y*(j+0.5);
+		       position_u_velocity_node_y[j] = delta_y*((j-ngcy)+0.5);
 		      }
 
 		   for (int i=0;i<Nx;i++) {
-		       position_v_velocity_node_x[i] = delta_x*(i+0.5);
+		       position_v_velocity_node_x[i] = delta_x*((i-ngcx)+0.5);
 		      }
 
 		   for (int j=0;j<Ny;j++) {
-		       position_v_velocity_node_y[j] = delta_y*j;
+		       position_v_velocity_node_y[j] = delta_y*(j-ngcy);
 		      }
 
 		   /* initialize values of Areas pressure and velocity nodes */
@@ -78,21 +78,7 @@ void initialization()
 			   }
 		   }
 
-		   for (int i=0;i<Nx;i++) {
-			   for (int j=0;j<Ny;j++) {
-				   Area_pressure_node[i][j] = delta_x*delta_y;
-			   }
-		   }
-
 		   /* initialize values of velocities */
-		   for (int i=0;i<Nx;i++) {
-			   for (int j=0;j<Ny;j++) {
-		          u_velocity[i][j] = 0.0;
-		          if (j==(Ny-1)){
-		              u_velocity[i][j] = lid_velocity;
-		          }
-			   }
-		   }
 
 		   for (int i=0;i<Nx;i++) {
 			   for (int j=0;j<Ny;j++) {
@@ -100,20 +86,29 @@ void initialization()
 			   }
 		   }
 
+		   for (int i=0;i<Nx;i++) {
+			   for (int j=0;j<Ny;j++) {
+		          u_velocity[i][j] = 0.0;
+		          if ((j==(Nodesy + ngcy - 1)) && (i>=ngcx) && (i<(Nodesx + ngcx))){
+		              u_velocity[i][j] = lid_velocity;
+		          }
+			   }
+		   }
+
 		   /* initialize values of old velocities, in this case, the same as the actual
 		    * velocities because we haven't performed any iteration yet */
 		   for (int i=0;i<Nx;i++) {
 			   for (int j=0;j<Ny;j++) {
-		          u_velocity_old[i][j] = 0.0;
-		          if (j==(Ny-1)){
-			          u_velocity_old[i][j] = lid_velocity;
-		          }
+		   	      v_velocity_old[i][j] = 0.0;
 			   }
 		   }
 
 		   for (int i=0;i<Nx;i++) {
 			   for (int j=0;j<Ny;j++) {
-		   	      v_velocity_old[i][j] = 0.0;
+		          u_velocity_old[i][j] = 0.0;
+		          if ((j==(Nodesy + ngcy - 1)) && (i>=ngcx) && (i<(Nodesx + ngcx))){
+			          u_velocity_old[i][j] = lid_velocity;
+		          }
 			   }
 		   }
 

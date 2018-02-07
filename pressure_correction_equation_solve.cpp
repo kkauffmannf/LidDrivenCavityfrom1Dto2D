@@ -52,157 +52,31 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 		   double S_pr;
 		   double a_p;
 
-		   for(int i=0; i<Nx; i++){
+		   for(int i=ngcx; i<(Nodesx+ngcx); i++){
 			   A_pressure = MatrixXd::Zero(Ny,Ny);
 			   b_pressure = VectorXd::Zero(Ny);
 
-			   for(int j=0;j<Ny;j++){
-				   /* The values of the variables depend on whether they are at boundaries (north, south, east, west) or not
-				    * so we separate for each cases. First we write the nodes at boundaries */
+			   for(int j=ngcy;j<(Nodesy+ngcx);j++){						   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];;
+						   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
+						   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
+						   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
+						   a_p = a_w + a_e + a_s + a_n;
+						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
+						   A_pressure(j,j) = a_p;
+						   A_pressure(j,j+1) = - a_n;
+						   A_pressure(j,j-1) = - a_s;
+						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
+						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 
-				   /* WEST */
-				   if(i==0){
-					   /* WEST BOTTOM */
-					   if(j==0){
-						   a_w = 0.0;
-						   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
-						   a_s = 0.0;
-						   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j+1) = - a_n;
-						   b_pressure(j) = a_e * pressure_prime((i+1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) - b_pressure[j]);
-					   }
-					   /* WEST TOP */
-		               else if (j==(Ny-1)){
-		            	   a_w = 0.0;
-						   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
-						   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
-		            	   a_n = 0.0;
-		    			   a_p = a_w + a_e + a_s + a_n;
-		    	           S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j-1) = - a_s;
-						   b_pressure(j) = a_e * pressure_prime((i+1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
-		               }
-					   /* WEST GENERAL */
-		               else {
-		            	   a_w = 0.0;
-						   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
-						   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
-						   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j+1) = - a_n;
-						   A_pressure(j,j-1) = - a_s;
-						   b_pressure(j) = a_e * pressure_prime((i+1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
-		               }
-//					   /* We also solve pressure_prime */
-//					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
-				   }
-				   /* EAST */
-				   else if(i==(Nx-1)){
-					   /* EAST BOTTOM */
-					   if(j==0){
-						   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];
-						   a_e = 0.0;
-						   a_s = 0.0;
-						   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j+1) = - a_n;
-						   b_pressure(j) = a_w * pressure_prime((i-1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) - b_pressure[j]);
-					   }
-					   /* EAST TOP */
-					   else if (j==(Ny-1)){
-						   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];
-						   a_e = 0.0;
-						   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
-						   a_n = 0.0;
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j-1) = - a_s;
-						   b_pressure(j) = a_w * pressure_prime((i-1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
-					   }
-					   /* EAST GENERAL */
-					   else {
-						   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];;
-						   a_e = 0.0;
-						   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
-						   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j+1) = - a_n;
-						   A_pressure(j,j-1) = - a_s;
-						   b_pressure(j) = a_w * pressure_prime((i-1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
-					   }
-//					   /* We also solve pressure_prime */
-//					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
-				   }
-				   /* MIDDLE */
-				   else {
-					   /* MIDDLE BOTTOM */
-					   if(j==0){
-						   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];;
-						   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
-						   a_s = 0.0;
-						   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j+1) = - a_n;
-						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) - b_pressure[j]);
-					   }
-					   /* MIDDLE TOP */
-					   else if (j==(Ny-1)){
-						   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];;
-						   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
-						   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
-						   a_n = 0.0;
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j-1) = - a_s;
-						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
-					   }
-					   /* MIDDLE MIDDLE */
-					   else {
-						   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];;
-						   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
-						   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
-						   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j+1) = - a_n;
-						   A_pressure(j,j-1) = - a_s;
-						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
-					   }
-//					   /* We also solve pressure_prime */
-//					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
-				   }
-				   /* keeping the highest residual, line by line (ith row) */
-				   if (pressure_residual_sum[i_iter] < pressure_residual_sum_prev[i_iter]) {
-					   pressure_residual_sum[i_iter]=pressure_residual_sum_prev[i_iter];
-				   }
+			   }
+			   /* keeping the highest residual, line by line (ith row) */
+			   if (pressure_residual_sum[i_iter] < pressure_residual_sum_prev[i_iter]) {
+				   pressure_residual_sum[i_iter]=pressure_residual_sum_prev[i_iter];
 			   }
 			   /* We also solve pressure_prime */
 			   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
 		   }
+	}
 
 
 
@@ -553,4 +427,4 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 ////		  cout << "# iterations" << "\t" << "x momentum residual" << "\t" << "pressure residual" << endl;
 ////   	      }
 
-}
+

@@ -1,11 +1,11 @@
-Nodesx = 5
-Nodesy = 5
+Nodesx = 50
+Nodesy = 50
 Lx = 1.0
 Ly = 1.0
 p_init = 0.0
 density = 1.0
 lid_velocity = 1.0
-Reynolds_num = 100.0
+Reynolds_num = 10.0
 urfu = 1.0
 urfv = 1.0
 urfp = 1.0
