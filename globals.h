@@ -16,8 +16,12 @@
 using namespace Eigen;
 
 /* Variables in input.txt to be defined at the start by the user. */
-extern int Nx; /* number of pressure nodes for the CV computation in the y direction */
-extern int Ny; /* number of pressure nodes for the CV computation in the x direction */
+extern int Nodesx; /* number of pressure nodes for the CV computation in the y direction */
+extern int Nodesy; /* number of pressure nodes for the CV computation in the x direction */
+extern int ngcx; /* number of guard cells in the x direction */
+extern int ngcy; /* number of guard cells in the y direction */
+extern int Nx; /* number of nodes plus guard cells in the x direction */
+extern int Ny; /* number of nodes plus guard cells in the y direction */
 extern double Lx; /* length of the cavity in the x direction */
 extern double Ly; /* length of the cavity in the y direction */
 extern double p_init;

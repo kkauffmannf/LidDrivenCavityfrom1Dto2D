@@ -102,8 +102,8 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   b_pressure(j) = a_e * pressure_prime((i+1),j) + S_pr;
 						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 		               }
-					   /* We also solve pressure_prime */
-					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
+//					   /* We also solve pressure_prime */
+//					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
 				   }
 				   /* EAST */
 				   else if(i==(Nx-1)){
@@ -147,8 +147,8 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   b_pressure(j) = a_w * pressure_prime((i-1),j) + S_pr;
 						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 					   }
-					   /* We also solve pressure_prime */
-					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
+//					   /* We also solve pressure_prime */
+//					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
 				   }
 				   /* MIDDLE */
 				   else {
@@ -192,14 +192,16 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
 						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 					   }
-					   /* We also solve pressure_prime */
-					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
+//					   /* We also solve pressure_prime */
+//					   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
 				   }
 				   /* keeping the highest residual, line by line (ith row) */
 				   if (pressure_residual_sum[i_iter] < pressure_residual_sum_prev[i_iter]) {
 					   pressure_residual_sum[i_iter]=pressure_residual_sum_prev[i_iter];
 				   }
 			   }
+			   /* We also solve pressure_prime */
+			   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
 		   }
 
 

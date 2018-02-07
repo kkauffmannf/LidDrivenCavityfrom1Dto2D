@@ -313,12 +313,12 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
 					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
-					   /* We set the boundary conditions for the north and west wall for u and the
-					    * south wall for v. We also solve v_star. */
-					   u_star.row(i) = VectorXd::Zero(Ny);
-					   u_star(i,(Ny-1)) = lid_velocity;
-					   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
-					   v_star(i,0) = 0.0;
+//					   /* We set the boundary conditions for the north and west wall for u and the
+//					    * south wall for v. We also solve v_star. */
+//					   u_star.row(i) = VectorXd::Zero(Ny);
+//					   u_star(i,(Ny-1)) = lid_velocity;
+//					   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
+//					   v_star(i,0) = 0.0;
 				   }
 				   /* SPECIAL CASE FOR U*/
 				   /* This is a special case because for u velocity, F_w has a term
@@ -482,10 +482,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
 					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
-					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
-					   u_star(i,(Ny-1)) = lid_velocity;
-					   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
-					   v_star(i,0) = 0.0;
+//					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
+//					   u_star(i,(Ny-1)) = lid_velocity;
+//					   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
+//					   v_star(i,0) = 0.0;
 				   }
 				   /* EAST */
 				   else if (i==(Nx-1)){
@@ -701,10 +701,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
 					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
-					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
-					   u_star(i,(Ny-1)) = lid_velocity;
-					   v_star.row(i) = VectorXd::Zero(Ny);
-					   v_star(i,0) = 0.0;
+//					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
+//					   u_star(i,(Ny-1)) = lid_velocity;
+//					   v_star.row(i) = VectorXd::Zero(Ny);
+//					   v_star(i,0) = 0.0;
 				   }
 				   /* MIDDLE */
 				   else {
@@ -920,10 +920,10 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 						   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
 					       y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 					   }
-					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
-					   u_star(i,(Ny-1)) = lid_velocity;
-					   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
-					   v_star(i,0) = 0.0;
+//					   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
+//					   u_star(i,(Ny-1)) = lid_velocity;
+//					   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
+//					   v_star(i,0) = 0.0;
 				   }
 
 				   /* keeping the highest residual, line by line (ith row) */
@@ -934,7 +934,13 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				       y_momentum_residual_sum[i_iter]=y_momentum_residual_sum_prev[i_iter];
 				   }
 			   }
+			   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
+			   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
+			   v_star(i,0) = 0.0;
+			   u_star(i,(Ny-1)) = lid_velocity;
 		   }
+		   u_star.row(0) = VectorXd::Zero(Ny);
+		   v_star.row((Nx-1)) = VectorXd::Zero(Ny);
 }
 
 

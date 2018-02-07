@@ -35,7 +35,7 @@ void underrelaxation(MatrixXd pressure_prime)
 	    		  /* east boundary */
 	    		  v_velocity[(Nx-1)][j] = 0.0;
 
-	    		  pressure[i][j] = (1.0-urfp)*pressure_old[i][j] + urfp*pressure_prime(i,j);
+	    		  pressure[i][j] = pressure_old[i][j] + urfp*pressure_prime(i,j);
 	    	  }
 	    	  /* north boundary */
 	    	  u_velocity[i][(Ny-1)] = lid_velocity;

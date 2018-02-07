@@ -52,10 +52,10 @@ void readinput()
 
 		      /* Stores the values from input.txt in the corrresponding variables */
 		      if (counter == 0) {
-		        istringstream ( temp ) >> Nx;
+		        istringstream ( temp ) >> Nodesx;
 		      }
 		      if (counter == 1) {
-		        istringstream ( temp ) >> Ny;
+		        istringstream ( temp ) >> Nodesy;
 		      }
 		      if (counter == 2) {
 		        istringstream ( temp ) >> Lx;

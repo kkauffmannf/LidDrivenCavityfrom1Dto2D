@@ -25,28 +25,49 @@ void correct_pressure_and_velocities(MatrixXd u_star, MatrixXd v_star, MatrixXd 
 
 	  for(int i=0;i<Nx;i++){
 		  for(int j=0;j<Ny;j++){
-			  pressure[i][j] = pressure[i][j] + pressure_prime(i,j);
+			  pressure[i][j] = pressure[i][j] + urfp * pressure_prime(i,j);
 			  /* The corrected velocities are */
 			  if (i==0){
 				  if (j==0){
 					  u_velocity[i][j] = 0.0;
-					  v_velocity[i][j] = v_star(i,j);
+					  v_velocity[i][j] = 0.0;
 				  }
-				  else {
-					  u_velocity[i][j] = u_star(i,j);
+				  else if (j==(Ny-1)){
+					  u_velocity[i][(Ny-1)] = lid_velocity;
 					  v_velocity[i][j] = v_star(i,j) + d_v[i][j] * ( pressure_prime(i,(j-1)) - pressure_prime(i,j) );
 				  }
+				  else {
+					  u_velocity[i][j] = 0.0;
+					  v_velocity[i][j] = v_star(i,j) + d_v[i][j] * ( pressure_prime(i,(j-1)) - pressure_prime(i,j) );
+				  }
+			  }
+			  else if(i==(Nx-1)){
+
+                  if (j!=(Ny-1)){
+                	  v_velocity[(Nx-1)][j] = 0.0;
+	    		  	  u_velocity[(Nx-1)][j] = u_star(i,j) + d_u[i][j] * ( pressure_prime((i-1),j) - pressure_prime(i,j) );
+                  }
+                  else {
+                	  v_velocity[(Nx-1)][j] = 0.0;
+					  u_velocity[i][(Ny-1)] = lid_velocity;
+				  }
+
 			  }
 			  else {
 				  if (j==0){
 					  u_velocity[i][j] = u_star(i,j) + d_u[i][j] * ( pressure_prime((i-1),j) - pressure_prime(i,j) );
-					  v_velocity[i][j] = v_star(i,j);
+					  v_velocity[i][j] = 0.0;
+				  }
+				  else if (j==(Ny-1)){
+					  u_velocity[i][(Ny-1)] = lid_velocity;
+					  v_velocity[i][j] = 0.0;
 				  }
 				  else {
 					  u_velocity[i][j] = u_star(i,j) + d_u[i][j] * ( pressure_prime((i-1),j) - pressure_prime(i,j) );
 					  v_velocity[i][j] = v_star(i,j) + d_v[i][j] * ( pressure_prime(i,(j-1)) - pressure_prime(i,j) );
 				  }
 			  }
-		  }
-	  }
+    	 }
+
+	 }
 }

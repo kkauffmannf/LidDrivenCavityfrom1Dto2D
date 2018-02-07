@@ -41,8 +41,12 @@ using namespace std::chrono;
 /* These are the global variables declared in global.h */
 
 /* Variables in input.txt to be defined at the start by the user. */
-int Nx = 130; /* number of pressure nodes for the CV computation in the y direction */
-int Ny = 130; /* number of pressure nodes for the CV computation in the x direction */
+int Nodesx = 130; /* number of pressure nodes for the CV computation in the x direction */
+int Nodesy = 130; /* number of pressure nodes for the CV computation in the y direction */
+int ngcx = 2; /* number of guard cells in the x direction on one side */
+int ngcy = 2; /* number of guard cells in the y direction on one side */
+int Nx = Nodesx + 2*ngcx; /* number of node plus guard cells in the x direction */
+int Ny = Nodesy + 2*ngcy; /* number of node plus guard cells in the y direction */
 double Lx = 1.0; /* length of the cavity in the x direction */
 double Ly = 1.0; /* length of the cavity in the y direction */
 double p_init = 0.0;
@@ -79,7 +83,7 @@ vector<vector<double>> d_v; /* parameter d for the pressure correction equation 
 /* Variables used for the iterations */
 int i_iter = 0; /* number of iterations */
 //int MAX_ITER = 1000000; /* set the maximum number of iterations to store in the residual vector */
-int MAX_ITER = 1000; /* set the maximum number of iterations to store in the residual vector */
+int MAX_ITER = 10; /* set the maximum number of iterations to store in the residual vector */
 vector<double> x_momentum_residual_sum; /* sum of the residuals of the x-momentum equation per iteration*/
 vector<double> y_momentum_residual_sum; /* sum of the residuals of the y-momentum equation per iteration*/
 vector<double> pressure_residual_sum; /* sum of the residuals of the pressure equation per iteration*/
@@ -140,6 +144,22 @@ int main()
 
 //   cout << u_star << endl;
 //   cout << v_star << endl;
+
+//   for(int i=0;i<Nx;i++){
+//	   for(int j=0;j<Ny;j++){
+//		   cout << u_velocity[i][j] << "   ";
+//	   }
+//	   cout << endl;
+//   }
+//   cout << endl;
+//
+//   for(int i=0;i<Nx;i++){
+//	   for(int j=0;j<Ny;j++){
+//		   cout << v_velocity[i][j] << "   ";
+//	   }
+//	   cout << endl;
+//   }
+//   cout << endl;
 //
 //   for(int i=0;i<Nx;i++){
 //	   for(int j=0;j<Ny;j++){
@@ -171,13 +191,28 @@ int main()
 
    ///////////////////////////////////////////////////////////////////////////////////////
 
-
    /* We have the velocities from the momentum equation and the pressures corrections,
     * so we now proceed to correct the pressure and velocities  */
    correct_pressure_and_velocities(u_star,v_star,pressure_prime);
 
+   for(int i=0;i<Nx;i++){
+	   for(int j=0;j<Ny;j++){
+		   cout << u_velocity[i][j] << "   ";
+	   }
+	   cout << endl;
+   }
+   cout << endl;
+
+   for(int i=0;i<Nx;i++){
+	   for(int j=0;j<Ny;j++){
+		   cout << v_velocity[i][j] << "   ";
+	   }
+	   cout << endl;
+   }
+   cout << endl;
+
    /* We apply the underrelaxation factors for velocity and pressure */
-   underrelaxation(pressure_prime);
+//   underrelaxation(pressure_prime);
 
 
 
@@ -196,11 +231,27 @@ int main()
     	      }
 
     	      /* Solving the momentum equation */
-    	      u_star=MatrixXd::Zero(Nx,Ny);
-    	      v_star=MatrixXd::Zero(Nx,Ny);
+//    	      u_star=MatrixXd::Zero(Nx,Ny);
+//    	      v_star=MatrixXd::Zero(Nx,Ny);
               momentum_equation_solve(u_star,v_star,(i_iter + 1));
 
+              for(int i=0;i<Nx;i++){
+           	   for(int j=0;j<Ny;j++){
+           		   cout << u_velocity[i][j] << "   ";
+           	   }
+           	   cout << endl;
+              }
+              cout << endl;
 
+              for(int i=0;i<Nx;i++){
+           	   for(int j=0;j<Ny;j++){
+           		   cout << v_velocity[i][j] << "   ";
+           	   }
+           	   cout << endl;
+              }
+              cout << endl << "jaja";
+
+              pressure_prime=MatrixXd::Zero(Nx,Ny);
               /* Solving the pressure equation */
               pressure_correction_equation_solve(u_star,v_star,pressure_prime,(i_iter + 1));
 
@@ -208,9 +259,25 @@ int main()
               /* Correcting the pressure and velocity */
               correct_pressure_and_velocities(u_star,v_star,pressure_prime);
 
+              for(int i=0;i<Nx;i++){
+           	   for(int j=0;j<Ny;j++){
+           		   cout << u_velocity[i][j] << "   ";
+           	   }
+           	   cout << endl;
+              }
+              cout << endl;
+
+              for(int i=0;i<Nx;i++){
+           	   for(int j=0;j<Ny;j++){
+           		   cout << v_velocity[i][j] << "   ";
+           	   }
+           	   cout << endl;
+              }
+              cout << endl;
+
 
               /* Applying the underrelaxation factor */
-              underrelaxation(pressure_prime);
+ //             underrelaxation(pressure_prime);
 
 
          /* Prints out the residuals */
@@ -223,8 +290,6 @@ int main()
 	     }
 
 	 /*************************** */
-
-
       }
 
 //      /* print out the position, the velocity and pressure */
