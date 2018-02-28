@@ -1,5 +1,5 @@
-Nodesx = 30
-Nodesy = 30
+Nodesx = 129
+Nodesy = 129
 Lx = 1.0
 Ly = 1.0
 p_init = 0.0
@@ -9,4 +9,4 @@ Reynolds_num = 100.0
 urfu = 0.2
 urfv = 0.2
 urfp = 0.2
-residual_threshold = 1.0E-5
+residual_threshold = 1.0E-4

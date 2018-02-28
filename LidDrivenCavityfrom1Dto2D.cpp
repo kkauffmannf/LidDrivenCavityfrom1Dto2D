@@ -202,7 +202,7 @@ int main()
    correct_pressure_and_velocities(u_star,v_star,pressure_prime);
 
    /* Imposes the boundary conditions on u_velocity and v_velocity guard cells */
-   boundary_conditions();
+//   boundary_conditions();
 
 //   /* We apply the underrelaxation factors for velocity and pressure */
 ////   underrelaxation(pressure_prime);
@@ -224,11 +224,11 @@ int main()
     	      }
 
     	      /* Solving the momentum equation */
-//    	      u_star=MatrixXd::Zero(Nx,Ny);
-//    	      v_star=MatrixXd::Zero(Nx,Ny);
+    	      u_star=MatrixXd::Zero(Nx,Ny);
+    	      v_star=MatrixXd::Zero(Nx,Ny);
               momentum_equation_solve(u_star,v_star,(i_iter + 1));
-              boundary_conditions();
-
+////              boundary_conditions();
+//
               pressure_prime=MatrixXd::Zero(Nx,Ny);
 
               /* Solving the pressure equation */

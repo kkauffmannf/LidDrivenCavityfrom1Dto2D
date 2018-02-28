@@ -35,6 +35,11 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 
 		   pressure_residual_sum_prev.resize(MAX_ITER);
 
+		   /* initialize values of the previous pressure residual */
+		   for (int i=0;i<(MAX_ITER);i++) {
+			   pressure_residual_sum_prev[i] = pressure_residual_sum[i];
+		   }
+
 	 	   /* this is the matrix A that stores the a_I,J values and the vector
 	  	    * b that stores the source values to solve the system of equations for
 	   	    * the pressure corrections. The system of equations is given by the pressure
