@@ -20,6 +20,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 // These libraries are used to measure the execution time of the program
@@ -82,7 +83,8 @@ vector<vector<double>> d_v; /* parameter d for the pressure correction equation 
 /* Variables used for the iterations */
 int i_iter = 0; /* number of iterations */
 //int MAX_ITER = 1000000; /* set the maximum number of iterations to store in the residual vector */
-int MAX_ITER = 1000; /* set the maximum number of iterations to store in the residual vector */
+int MAX_ITER = 50000; /* set the maximum number of iterations to store in the residual vector */
+//int MAX_ITER = 4; /* set the maximum number of iterations to store in the residual vector */
 vector<double> x_momentum_residual_sum; /* sum of the residuals of the x-momentum equation per iteration*/
 vector<double> y_momentum_residual_sum; /* sum of the residuals of the y-momentum equation per iteration*/
 vector<double> pressure_residual_sum; /* sum of the residuals of the pressure equation per iteration*/
@@ -277,5 +279,26 @@ int main()
      cout << "It took me " << time_span.count() << " seconds.";
      cout << endl;
 
+
+     /* write to a file the u_velocity along vertical line through center
+      * write to a file the v_velocity along horizontal line through center*/
+     ofstream myfile[2];
+
+     myfile[0].open("u_velocity_center.txt");
+     myfile[1].open("v_velocity_center.txt");
+     if (myfile[0].is_open() && myfile[1].is_open())
+     {
+         for(int j=ngcy; j<(Nodesy+ngcy); j++) {
+      	     myfile[0] << (j - ngcy) * Ly/(Nodesy-0.5) << "\t" << u_velocity[floor((Nodesx+ngcx)/2)][j] << "\n";
+         }
+         for(int i=ngcx; i<(Nodesx+ngcx); i++) {
+        	 myfile[1] << (i - ngcx) * Lx/(Nodesx-0.5) << "\t" << v_velocity[i][floor((Nodesy+ngcy)/2)] << "\n";
+         }
+
+         myfile[0].close();
+         myfile[1].close();
+     }
+     else cout << "Unable to open file";
+     return 0;
 
 }
