@@ -56,25 +56,59 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 			   A_pressure = MatrixXd::Zero(Ny,Ny);
 			   b_pressure = VectorXd::Zero(Ny);
 
-			   for(int j=ngcy;j<(Nodesy+ngcx);j++){						   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];;
-						   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
-						   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
-						   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
-						   a_p = a_w + a_e + a_s + a_n;
-						   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
-						   A_pressure(j,j) = a_p;
-						   A_pressure(j,j+1) = - a_n;
-						   A_pressure(j,j-1) = - a_s;
-						   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
-						   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
-
+			   for(int j=ngcy;j<(Nodesy+ngcx);j++){
+				   a_w = density * d_u[i][j] * Area_velocity_node_u[i][j];;
+				   a_e = density * d_u[i+1][j] * Area_velocity_node_u[i+1][j];
+				   a_s = density * d_v[i][j] * Area_velocity_node_v[i][j];
+				   a_n = density * d_v[i][j+1] * Area_velocity_node_v[i][j+1];
+				   a_p = a_w + a_e + a_s + a_n;
+				   S_pr = (density * u_star(i,j) * Area_velocity_node_u[i][j]) - (density * u_star((i+1),j) * Area_velocity_node_u[i+1][j]) + (density * v_star(i,j) * Area_velocity_node_v[i][j]) - (density * v_star(i,j+1) * Area_velocity_node_v[i][j+1]);
+				   A_pressure(j,j) = a_p;
+				   A_pressure(j,j+1) = - a_n;
+				   A_pressure(j,j-1) = - a_s;
+				   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
+				   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
 			   }
 			   /* keeping the highest residual, line by line (ith row) */
 			   if (pressure_residual_sum[i_iter] < pressure_residual_sum_prev[i_iter]) {
 				   pressure_residual_sum[i_iter]=pressure_residual_sum_prev[i_iter];
 			   }
+//			   				      	      cout << "Pressure matrix A:" << endl;
+//			   				      	      cout << A_pressure << endl;
+//			   				      	      cout << endl;
+//			   				      	      cout << "Pressure source vector b:" << endl;
+//			   				      	      cout << b_pressure << endl;
 			   /* We also solve pressure_prime */
 			   pressure_prime.row(i) = A_pressure.colPivHouseholderQr().solve(b_pressure);
+		   }
+
+		   /* BC */
+		   /* west guard cells */
+		   for (int i=0;i<ngcx;i++){
+			   for (int j=0;j<Ny;j++){
+				   pressure[i][j] = pressure[ngcx][j];
+			   }
+
+		   }
+		   /* east guard cells */
+		   for (int i=(Nodesx + ngcx - 1);i<Nx;i++){
+			   for (int j=0;j<Ny;j++){
+				   pressure[i][j] = pressure[(Nodesx + ngcx - 2)][j];
+			   }
+		   }
+
+		   /* south guard cells */
+		   for (int i=0;i<Nx;i++){
+			   for (int j=0;j<ngcy;j++){
+				   pressure[i][j] = pressure[i][ngcy];
+			   }
+		   }
+
+		   /* north guard cells */
+		   for (int i=0;i<Nx;i++){
+			   for (int j=(Nodesy + ngcy - 1);j<Ny;j++){
+				   pressure[i][j] = pressure[i][(Nodesy + ngcy - 2)];
+			   }
 		   }
 	}
 

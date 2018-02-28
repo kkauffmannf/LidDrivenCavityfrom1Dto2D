@@ -157,6 +157,24 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 			   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
 			   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
 		   }
+
+
+			/* BC. We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
+			/* negative velocity, so when they sum, it is equal to zero */
+			for (int j=ngcy;j<(Nodesy + ngcy);j++){
+				u_star((Nodesx + ngcx),j) = -1.0 * u_star((Nodesx + ngcx - 1),j);
+				v_star((ngcx - 1),j) = -1.0 * v_star(ngcx,j);
+				u_star(ngcx,j) = 0.0;
+				v_star((Nodesx + ngcx - 1),j) = 0.0;
+			}
+
+			for (int i=ngcx;i<(Nodesx + ngcx);i++) {
+				u_star(i,(ngcy - 1)) = -1.0 * u_star(i,ngcy);
+				v_star(i,(Nodesy + ngcy)) = - 1.0 * v_star(i,(Nodesy + ngcy - 1));
+				u_star(i,(Nodesy + ngcy - 1)) = lid_velocity;
+				v_star(i,ngcy) = 0.0;
+			}
+
 		   /* BC */
 			/* west guard cells */
 			for (int i=0;i<ngcx;i++){
@@ -194,21 +212,6 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 
 			}
 
-			/* BC. We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
-			/* negative velocity, so when they sum, it is equal to zero */
-			for (int j=ngcy;j<(Nodesy + ngcy);j++){
-				u_star((Nodesx + ngcx),j) = - u_star((Nodesx + ngcx - 1),j);
-				v_star((ngcx - 1),j) = - v_star(ngcx,j);
-				u_star(ngcx,j) = 0.0;
-				v_star((Nodesx + ngcx - 1),j) = 0.0;
-			}
-
-			for (int i=ngcx;i<(Nodesx + ngcx);i++) {
-				u_star(i,(ngcy - 1)) = - u_star(i,ngcy);
-				v_star(i,(Nodesy + ngcy)) = - v_star(i,(Nodesy + ngcy - 1));
-				u_star(i,(Nodesy + ngcy - 1)) = lid_velocity;
-				v_star(i,ngcy) = 0.0;
-			}
 //			u_star(ngcx,ngcy) = 0.0;
 			v_star(ngcx,ngcy) = 0.0;
 			u_star((Nodesx + ngcx - 1),(Nodesy + ngcy - 1)) = lid_velocity;

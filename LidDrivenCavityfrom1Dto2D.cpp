@@ -82,7 +82,7 @@ vector<vector<double>> d_v; /* parameter d for the pressure correction equation 
 /* Variables used for the iterations */
 int i_iter = 0; /* number of iterations */
 //int MAX_ITER = 1000000; /* set the maximum number of iterations to store in the residual vector */
-int MAX_ITER = 10; /* set the maximum number of iterations to store in the residual vector */
+int MAX_ITER = 1000; /* set the maximum number of iterations to store in the residual vector */
 vector<double> x_momentum_residual_sum; /* sum of the residuals of the x-momentum equation per iteration*/
 vector<double> y_momentum_residual_sum; /* sum of the residuals of the y-momentum equation per iteration*/
 vector<double> pressure_residual_sum; /* sum of the residuals of the pressure equation per iteration*/
@@ -149,7 +149,7 @@ int main()
 
 
    /* Imposes the boundary conditions on u_velocity and v_velocity guard cells */
-   boundary_conditions();
+//   boundary_conditions();
 
 ////   for(int i=0;i<Nx;i++){
 ////	   for(int j=0;j<Ny;j++){
@@ -232,11 +232,11 @@ int main()
               pressure_prime=MatrixXd::Zero(Nx,Ny);
 
               /* Solving the pressure equation */
-              pressure_correction_equation_solve(u_star,v_star,pressure_prime,(i_iter + 1));
+             pressure_correction_equation_solve(u_star,v_star,pressure_prime,(i_iter + 1));
 
               /* Correcting the pressure and velocity */
               correct_pressure_and_velocities(u_star,v_star,pressure_prime);
-              boundary_conditions();
+ //             boundary_conditions();
 
               /* Applying the underrelaxation factor */
  //             underrelaxation(pressure_prime);

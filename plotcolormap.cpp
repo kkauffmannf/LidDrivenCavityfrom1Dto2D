@@ -49,6 +49,7 @@ void plotcolormap()
 		   velocities[index][1]=position_u_velocity_node_x[counter2];
 		   velocities[index][2]=sqrt(u_velocity[counter2][counter1]*u_velocity[counter2][counter1] + v_velocity[counter2][counter1]*v_velocity[counter2][counter1]);
 //		   velocities[index][2]=pressure[counter2][counter1];
+//		   velocities[index][2]=v_velocity[counter2][counter1];
 		   index++;
        }
    }
@@ -73,11 +74,14 @@ void plotcolormap()
 	gp << "set xtics font 'Times-Roman,14'\n";
 	gp << "set ytics font 'Times-Roman,14'\n";
 	gp << "set title 'Velocity of the fluid in the cavity' font 'Times-Roman,20'\n";
+	gp << "set size ratio "<< Ly/Lx <<"\n";
 	gp << "unset key\n";
 
 	//set ranges
-	gp << "set xrange[-1.0:" << 2*Lx << "]\n";
-	gp << "set yrange[-1.0:" << 2*Ly << "]\n";
+//	gp << "set xrange[0.0:" << Lx << "]\n";
+//	gp << "set yrange[0.0:" << Ly << "]\n";
+	gp << "set xrange[" << - (ngcx + 1) * Lx/(Nodesx-0.5) << ":" << Lx + (ngcx + 1) * Lx/(Nodesx-0.5) << "]\n";
+	gp << "set yrange[" << - (ngcy + 1) * Ly/(Nodesy-0.5) << ":" << Ly + (ngcy + 1) * Ly/(Nodesy-0.5) << "]\n";
 
 //	//plot with contours
 ////	gp << "set parametric\n";
@@ -88,9 +92,10 @@ void plotcolormap()
 //
 
 //	gp << "splot " << gp.file1d(velocities) << " using 2:1:3\n";
-	gp << "plot " << gp.file1d(velocities) << " using 2:1:3 with image pixels\n" << endl;
+//	gp << "plot " << gp.file1d(velocities) << " using 2:1:3 with image pixels\n";
+	gp << "plot " << gp.file1d(velocities) << " using 2:1:3 with image pixels\n";
 
     //Generates pdf figure
-	gp << "set term pdf\nset output 'velocity_cavity.pdf'\nreplot\nset term x11" << endl;
+	gp << "set term pdf\nset output 'velocity_cavity.pdf'\nreplot\nset term x11";
 
 }
