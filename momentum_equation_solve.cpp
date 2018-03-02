@@ -162,63 +162,130 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 		   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter]/x_momentum_residual_sum_norm;
 		   y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter]/y_momentum_residual_sum_norm;
 
-			/* BC. We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
-			/* negative velocity, so when they sum, it is equal to zero */
-			for (int j=ngcy;j<(Nodesy + ngcy);j++){
-				u_star((Nodesx + ngcx),j) = -1.0 * u_star((Nodesx + ngcx - 1),j);
-				v_star((ngcx - 1),j) = -1.0 * v_star(ngcx,j);
-				u_star(ngcx,j) = 0.0;
-				v_star((Nodesx + ngcx - 1),j) = 0.0;
-			}
+//		   	/* Guard cells just at the border */
+//		   	/* We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
+//		   	/* negative velocity, so when they sum, it is equal to zero, thus giving zero in between. */
+//
+//
+//		   	for (int j=ngcy;j<(Nodesy + ngcy);j++){
+//		   		/* west guard cells */
+//		   		u_star(ngcx,j) = 0.0;
+//		   		v_star((ngcx - 1),j) = - v_star(ngcx,j);
+//
+//		   		/* east guard cells */
+//		   		u_star((Nodesx + ngcx),j) = - u_star((Nodesx + ngcx - 1),j);
+//		   		v_star((Nodesx + ngcx - 1),j) = 0.0;
+//		   	}
+//
+//		   	for (int i=ngcx;i<(Nodesx + ngcx);i++) {
+//		   		/* south guard cells */
+//		   		u_star(i,(ngcy - 1)) = - u_star(i,ngcy);
+//		   		v_star(i,ngcy) = 0.0;
+//
+//		   		/* north guard cells */
+//		   		u_star(i,(Nodesy + ngcy - 1)) = lid_velocity;
+//		   		v_star(i,(Nodesy + ngcy)) = - v_star(i,(Nodesy + ngcy - 1));
+//		   	}
+//
+//		   /* Guard cells not just at the border */
+//
+//		   	/* west guard cells */
+//		   	for (int i=0;i<(ngcx - 1);i++){
+//		   		for (int j=0;j<Ny;j++){
+//		   			u_star(i,j) = 0.0;
+//		   			v_star(i,j) = 0.0;
+//		   		}
+//
+//		   	}
+//
+//		   	/* east guard cells */
+//		   	for (int i=(Nodesx + ngcx);i<Nx;i++){
+//		   		for (int j=0;j<Ny;j++){
+//		   			u_star(i,j) = 0.0;
+//		   			v_star(i,j) = 0.0;
+//		   		}
+//
+//		   	}
+//
+//		   	/* south guard cells */
+//		   	for (int i=0;i<Nx;i++){
+//		   		for (int j=0;j<(ngcy - 1);j++){
+//		   			u_star(i,j) = 0.0;
+//		   			v_star(i,j) = 0.0;
+//		   		}
+//
+//		   	}
+//
+//		   	/* north guard cells */
+//		   	for (int i=0;i<Nx;i++){
+//		   		for (int j=(Nodesy + ngcy);j<Ny;j++){
+//		   			u_star(i,j) = 0.0;
+//		   			v_star(i,j) = 0.0;
+//		   		}
+//
+//		   	}
+//
+//		   	/* corners */
+//		   	v_star((Nodesx + ngcx - 1),ngcy) = 0.0;
+//		   	u_star(ngcx,(Nodesy + ngcy - 1)) = lid_velocity;
 
-			for (int i=ngcx;i<(Nodesx + ngcx);i++) {
-				u_star(i,(ngcy - 1)) = -1.0 * u_star(i,ngcy);
-				v_star(i,(Nodesy + ngcy)) = - 1.0 * v_star(i,(Nodesy + ngcy - 1));
-				u_star(i,(Nodesy + ngcy - 1)) = lid_velocity;
-				v_star(i,ngcy) = 0.0;
-			}
-
-		   /* BC */
-			/* west guard cells */
-			for (int i=0;i<ngcx;i++){
-				for (int j=0;j<Ny;j++){
-					u_star(i,j) = 0.0;
-					v_star(i,j) = 0.0;
-				}
-
-			}
-
-			/* east guard cells */
-			for (int i=(Nodesx + ngcx);i<Nx;i++){
-				for (int j=0;j<Ny;j++){
-					u_star(i,j) = 0.0;
-					v_star(i,j) = 0.0;
-				}
-
-			}
-
-			/* south guard cells */
-			for (int i=0;i<Nx;i++){
-				for (int j=0;j<ngcy;j++){
-					u_star(i,j) = 0.0;
-					v_star(i,j) = 0.0;
-				}
-
-			}
-
-			/* north guard cells */
-			for (int i=0;i<Nx;i++){
-				for (int j=(Nodesy + ngcy);j<Ny;j++){
-					u_star(i,j) = 0.0;
-					v_star(i,j) = 0.0;
-				}
-
-			}
-
-//			u_star(ngcx,ngcy) = 0.0;
-			v_star(ngcx,ngcy) = 0.0;
-			u_star((Nodesx + ngcx - 1),(Nodesy + ngcy - 1)) = lid_velocity;
-//			v_star((Nodesx + ngcx - 1),(Nodesy + ngcy - 1)) = 0.0;
+//			/* BC. We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
+//			/* negative velocity, so when they sum, it is equal to zero */
+//			for (int j=ngcy;j<(Nodesy + ngcy);j++){
+//				u_star((Nodesx + ngcx),j) = -1.0 * u_star((Nodesx + ngcx - 1),j);
+//				v_star((ngcx - 1),j) = -1.0 * v_star(ngcx,j);
+//				u_star(ngcx,j) = 0.0;
+//				v_star((Nodesx + ngcx - 1),j) = 0.0;
+//			}
+//
+//			for (int i=ngcx;i<(Nodesx + ngcx);i++) {
+//				u_star(i,(ngcy - 1)) = -1.0 * u_star(i,ngcy);
+//				v_star(i,(Nodesy + ngcy)) = - 1.0 * v_star(i,(Nodesy + ngcy - 1));
+//				u_star(i,(Nodesy + ngcy - 1)) = lid_velocity;
+//				v_star(i,ngcy) = 0.0;
+//			}
+//
+//		   /* BC */
+//			/* west guard cells */
+//			for (int i=0;i<ngcx;i++){
+//				for (int j=0;j<Ny;j++){
+//					u_star(i,j) = 0.0;
+//					v_star(i,j) = 0.0;
+//				}
+//
+//			}
+//
+//			/* east guard cells */
+//			for (int i=(Nodesx + ngcx);i<Nx;i++){
+//				for (int j=0;j<Ny;j++){
+//					u_star(i,j) = 0.0;
+//					v_star(i,j) = 0.0;
+//				}
+//
+//			}
+//
+//			/* south guard cells */
+//			for (int i=0;i<Nx;i++){
+//				for (int j=0;j<ngcy;j++){
+//					u_star(i,j) = 0.0;
+//					v_star(i,j) = 0.0;
+//				}
+//
+//			}
+//
+//			/* north guard cells */
+//			for (int i=0;i<Nx;i++){
+//				for (int j=(Nodesy + ngcy);j<Ny;j++){
+//					u_star(i,j) = 0.0;
+//					v_star(i,j) = 0.0;
+//				}
+//
+//			}
+//
+////			u_star(ngcx,ngcy) = 0.0;
+//			v_star(ngcx,ngcy) = 0.0;
+//			u_star((Nodesx + ngcx - 1),(Nodesy + ngcy - 1)) = lid_velocity;
+////			v_star((Nodesx + ngcx - 1),(Nodesy + ngcy - 1)) = 0.0;
 }
 
 

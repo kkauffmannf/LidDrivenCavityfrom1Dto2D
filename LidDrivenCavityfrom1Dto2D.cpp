@@ -83,7 +83,7 @@ vector<vector<double>> d_v; /* parameter d for the pressure correction equation 
 /* Variables used for the iterations */
 int i_iter = 0; /* number of iterations */
 //int MAX_ITER = 1000000; /* set the maximum number of iterations to store in the residual vector */
-int MAX_ITER = 800; /* set the maximum number of iterations to store in the residual vector */
+int MAX_ITER = 10000; /* set the maximum number of iterations to store in the residual vector */
 //int MAX_ITER = 4; /* set the maximum number of iterations to store in the residual vector */
 vector<double> x_momentum_residual_sum; /* sum of the residuals of the x-momentum equation per iteration*/
 vector<double> y_momentum_residual_sum; /* sum of the residuals of the y-momentum equation per iteration*/
@@ -136,7 +136,7 @@ int main()
    /* Initializes the variables */
    initialization();
 
-   /* Imposes the boundary conditions on u_velocity and v_velocity guard cells */
+   /* Imposes the boundary conditions on u_velocity, v_velocity and pressure guard cells and borders */
    boundary_conditions();
 
    /* We obtain the guessed velocities (u_star*) by solving the system of
@@ -202,6 +202,9 @@ int main()
     * so we now proceed to correct the pressure and velocities  */
    correct_pressure_and_velocities(u_star,v_star,pressure_prime);
 
+   /* Imposes the boundary conditions on u_velocity, v_velocity and pressure guard cells and borders */
+   boundary_conditions();
+
       /* Start next iteration until the residuals are lower than the threshold */
       while((i_iter < MAX_ITER) && ((x_momentum_residual_sum[i_iter] > residual_threshold) || (y_momentum_residual_sum[i_iter] > residual_threshold) || (pressure_residual_sum[i_iter] > residual_threshold)) ) {
 
@@ -226,6 +229,9 @@ int main()
 
               /* Correcting the pressure and velocity */
               correct_pressure_and_velocities(u_star,v_star,pressure_prime);
+
+              /* Imposes the boundary conditions on u_velocity, v_velocity and pressure guard cells and borders */
+              boundary_conditions();
 
 
          /* Prints out the residuals */

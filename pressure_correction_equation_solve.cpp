@@ -68,7 +68,7 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 				   A_pressure(j,j-1) = - a_s;
 				   b_pressure(j) = a_e * pressure_prime((i+1),j) + a_w * pressure_prime((i-1),j) + S_pr;
 //				   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(A_pressure(j,j)*pressure_prime(i,j) + A_pressure(j,j+1)*pressure_prime(i,j+1) + A_pressure(j,j-1)*pressure_prime(i,j-1) - b_pressure[j]);
-				   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + b_pressure[j];
+				   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter] + abs(b_pressure[j]);
 			   }
 
 //			   				      	      cout << "Pressure matrix A:" << endl;
@@ -87,33 +87,89 @@ void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, Matrix
 
 		   pressure_residual_sum[i_iter] = pressure_residual_sum[i_iter]/pressure_residual_sum_norm;
 
-		   /* BC */
-		   /* west guard cells */
-		   for (int i=0;i<ngcx;i++){
-			   for (int j=0;j<Ny;j++){
-				   pressure[i][j] = pressure[ngcx][j];
-			   }
+//		   /* Guard cells not just at the border */
+//
+//		   	/* west guard cells */
+//		   	for (int i=0;i<(ngcx - 1);i++){
+//		   		for (int j=0;j<Ny;j++){
+//		   			pressure[i][j] = pressure[ngcx][j];
+//		   		}
+//
+//		   	}
+//
+//		   	/* east guard cells */
+//		   	for (int i=(Nodesx + ngcx);i<Nx;i++){
+//		   		for (int j=0;j<Ny;j++){
+//		   			pressure[i][j] = pressure[(Nodesx + ngcx - 1)][j];
+//		   		}
+//
+//		   	}
+//
+//		   	/* south guard cells */
+//		   	for (int i=0;i<Nx;i++){
+//		   		for (int j=0;j<(ngcy - 1);j++){
+//		   			pressure[i][j] = pressure[i][ngcy];
+//		   		}
+//
+//		   	}
+//
+//		   	/* north guard cells */
+//		   	for (int i=0;i<Nx;i++){
+//		   		for (int j=(Nodesy + ngcy);j<Ny;j++){
+//		   			pressure[i][j] = pressure[i][(Nodesy + ngcy - 1)];
+//		   		}
+//
+//		   	}
 
-		   }
-		   /* east guard cells */
-		   for (int i=(Nodesx + ngcx - 1);i<Nx;i++){
-			   for (int j=0;j<Ny;j++){
-				   pressure[i][j] = pressure[(Nodesx + ngcx - 2)][j];
-			   }
-		   }
+		   	/* Guard cells just at the border */
+		   	/* We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
+		   	/* negative velocity, so when they sum, it is equal to zero, thus giving zero in between. */
 
-		   /* south guard cells */
-		   for (int i=0;i<Nx;i++){
-			   for (int j=0;j<ngcy;j++){
-				   pressure[i][j] = pressure[i][ngcy];
-			   }
-		   }
 
-		   /* north guard cells */
-		   for (int i=0;i<Nx;i++){
-			   for (int j=(Nodesy + ngcy - 1);j<Ny;j++){
-				   pressure[i][j] = pressure[i][(Nodesy + ngcy - 2)];
-			   }
-		   }
+//		   	for (int j=ngcy;j<(Nodesy + ngcy);j++){
+//		   		/* west guard cells */
+//		   		pressure[(ngcx - 1)][j] = pressure[ngcx][j];
+//
+//		   		/* east guard cells */
+//		   		pressure[(Nodesx + ngcx)][j] = pressure[(Nodesx + ngcx - 1)][j];
+//		   	}
+//
+//		   	for (int i=ngcx;i<(Nodesx + ngcx);i++) {
+//		   		/* south guard cells */
+//		   		pressure[i][(ngcy - 1)] = pressure[i][ngcy];
+//
+//		   		/* north guard cells */
+//		   		pressure[i][(Nodesy + ngcy)] = pressure[i][(Nodesy + ngcy - 1)];
+//		   	}
+
+
+//		   /* BC */
+//		   /* west guard cells */
+//		   for (int i=0;i<ngcx;i++){
+//			   for (int j=0;j<Ny;j++){
+//				   pressure[i][j] = pressure[ngcx][j];
+//			   }
+//
+//		   }
+//		   /* east guard cells */
+//		   for (int i=(Nodesx + ngcx - 1);i<Nx;i++){
+//			   for (int j=0;j<Ny;j++){
+//				   pressure[i][j] = pressure[(Nodesx + ngcx - 2)][j];
+//			   }
+//		   }
+//
+//		   /* south guard cells */
+//		   for (int i=0;i<Nx;i++){
+//			   for (int j=0;j<ngcy;j++){
+//				   pressure[i][j] = pressure[i][ngcy];
+//			   }
+//		   }
+//
+//		   /* north guard cells */
+//		   for (int i=0;i<Nx;i++){
+//			   for (int j=(Nodesy + ngcy - 1);j<Ny;j++){
+//				   pressure[i][j] = pressure[i][(Nodesy + ngcy - 2)];
+//			   }
+//		   }
 	}
 
