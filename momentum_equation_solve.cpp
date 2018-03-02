@@ -36,17 +36,9 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 		    *
 		    * */
 
-		   vector<double> x_momentum_residual_sum_prev;
-		   vector<double> y_momentum_residual_sum_prev;
-
-		   x_momentum_residual_sum_prev.resize(MAX_ITER);
-		   y_momentum_residual_sum_prev.resize(MAX_ITER);
-
-		   /* initialize values of the previous momentum residual */
-		   for (int i=0;i<(MAX_ITER);i++) {
-			  x_momentum_residual_sum_prev[i] = x_momentum_residual_sum[i];
-			  y_momentum_residual_sum_prev[i] = y_momentum_residual_sum[i];
-		   }
+		   /* initialize values of the momentum residual */
+			x_momentum_residual_sum[i_iter] = 0.0;
+			y_momentum_residual_sum[i_iter] = 0.0;
 
 		   /* these are the matrices A for u and v velocities that store the a_p, a_w, a_e, a_n and a_s
 		    * and the vector b that stores the S_u and S_v values to solve the system of equations for
@@ -147,17 +139,28 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 				   y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
 			   }
 
-			   /* keeping the highest residual, line by line (ith row) */
-			   if (x_momentum_residual_sum[i_iter] < x_momentum_residual_sum_prev[i_iter]) {
-				   x_momentum_residual_sum[i_iter]=x_momentum_residual_sum_prev[i_iter];
-			   }
-			   if (y_momentum_residual_sum[i_iter] < y_momentum_residual_sum_prev[i_iter]) {
-				   y_momentum_residual_sum[i_iter]=y_momentum_residual_sum_prev[i_iter];
-			   }
 			   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
 			   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
+
+//			   u_star.row(i) = A_u_velocity.ldlt().solve(b_u_velocity);
+//			   v_star.row(i) = A_v_velocity.ldlt().solve(b_v_velocity);
 		   }
 
+		   if(i_iter == 0){
+			   x_momentum_residual_sum_norm = x_momentum_residual_sum[0];
+			   y_momentum_residual_sum_norm = y_momentum_residual_sum[0];
+
+			   /* to avoid dividing by zero */
+			   if (x_momentum_residual_sum_norm == 0.0){
+				   x_momentum_residual_sum_norm = 1.0E4/residual_threshold;
+			   }
+			   if (y_momentum_residual_sum_norm == 0.0){
+				   y_momentum_residual_sum_norm = 1.0E4/residual_threshold;
+			   }
+		   }
+
+		   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter]/x_momentum_residual_sum_norm;
+		   y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter]/y_momentum_residual_sum_norm;
 
 			/* BC. We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
 			/* negative velocity, so when they sum, it is equal to zero */

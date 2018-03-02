@@ -60,6 +60,9 @@ extern int MAX_ITER; /* set the maximum number of iterations to store in the res
 extern std::vector<double> x_momentum_residual_sum; /* sum of the residuals of the x-momentum equation per iteration*/
 extern std::vector<double> y_momentum_residual_sum; /* sum of the residuals of the y-momentum equation per iteration*/
 extern std::vector<double> pressure_residual_sum; /* sum of the residuals of the pressure equation per iteration*/
+extern double x_momentum_residual_sum_norm; /* norm sum of the residuals of the x-momentum equation (1st iteration)*/
+extern double y_momentum_residual_sum_norm; /* norm of sum of the residuals of the y-momentum equation (1st iteration)*/
+extern double pressure_residual_sum_norm; /* norm of the sum of the residuals of the pressure equation (1st iteration)*/
 
 /* Modules external to main */
 void readinput();
