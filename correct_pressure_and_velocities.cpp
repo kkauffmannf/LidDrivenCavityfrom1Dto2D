@@ -12,23 +12,33 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <Eigen/SVD>
-#include <Eigen/Dense>
+//#include <Eigen/SVD>
+//#include <Eigen/Dense>
 #include "globals.h"
 
 using namespace std;
 
-void correct_pressure_and_velocities(MatrixXd u_star, MatrixXd v_star, MatrixXd pressure_prime)
+void correct_pressure_and_velocities(vector<vector<double>> u_star, vector<vector<double>> v_star, vector<vector<double>> pressure_prime)
 {
 
 	  /* We set the new values for the pressures due to the corrections */
 
-	  for(int i=ngcx; i<(Nodesx+ngcx); i++){
-		  for(int j=ngcy;j<(Nodesy+ngcy);j++){
-			  pressure[i][j] = pressure[i][j] + urfp * pressure_prime(i,j);
-			  u_velocity[i][j] = u_star(i,j) + d_u[i][j] * ( pressure_prime((i-1),j) - pressure_prime(i,j) );
-			  v_velocity[i][j] = v_star(i,j) + d_v[i][j] * ( pressure_prime(i,(j-1)) - pressure_prime(i,j) );
-		   }
+	  for(int i=ngc; i<(Npx-ngc);i++){
+		  for(int j=ngc; j<(Npy-ngc);j++){
+			  pressure[i][j] = pressure_old[i][j] + urfp * pressure_prime[i][j];
+		  }
 	  }
+
+	  for(int i=ngc; i<(Nux-ngc);i++){
+		  for(int j=ngc; j<(Nuy-ngc);j++){
+			  u_velocity[i][j] = u_star[i][j] + d_u[i][j] * ( pressure_prime[(i-1)][j] - pressure_prime[i][j] );
+		  }
+	  }
+	  for(int i=ngc; i<(Nvx-ngc);i++){
+		  for(int j=ngc; j<(Nvy-ngc);j++){
+			  v_velocity[i][j] = v_star[i][j] + d_v[i][j] * ( pressure_prime[i][(j-1)] - pressure_prime[i][j] );
+		  }
+	  }
+
 
 }

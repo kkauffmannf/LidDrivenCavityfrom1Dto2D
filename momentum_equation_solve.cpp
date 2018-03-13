@@ -12,13 +12,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <Eigen/SVD>
-#include <Eigen/Dense>
+#include <cmath>
+//#include <Eigen/SVD>
+//#include <Eigen/Dense>
 #include "globals.h"
 
 using namespace std;
 
-void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
+void momentum_equation_solve(vector<vector<double>> &u_star, vector<vector<double>> &v_star, int i_iter)
 {
 	   /* Solve the discretised momentum equation using the guessed values of
 		    * velocity and pressure. The equations for u and v velocities have the form:
@@ -46,10 +47,11 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 		    * equations. We solve the system A_u*u=b_u, A_v*v=b_v and the solutions of u and v are set to
 		    * be the guessed velocities u=u* and v=v*
 		    */
-		   MatrixXd A_u_velocity = MatrixXd::Zero(Ny,Ny);
-		   VectorXd b_u_velocity = VectorXd::Zero(Ny);
-		   MatrixXd A_v_velocity = MatrixXd::Zero(Ny,Ny);
-		   VectorXd b_v_velocity = VectorXd::Zero(Ny);
+
+			vector<vector<double>> A_u_velocity(Nuy, vector<double>(Nuy));
+			vector<double> b_u_velocity(Nuy, 0.0);
+			vector<vector<double>> A_v_velocity(Nvy, vector<double>(Nvy));
+			vector<double> b_v_velocity(Nvy, 0.0);
 
 		   /* For velocity nodes we assume density and Gamma=1/Reynolds_num constant */
 
@@ -71,80 +73,109 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 		   double a_p;
 		   double delta_F;
 		   double Gamma_constant = 1/Reynolds_num; /* constant diffusion coefficient */
-		   double delta_x = Lx/(Nx-0.5); /* spacing of the grid in x (uniform grid) */
-		   double delta_y = Ly/(Ny-0.5); /* spacing of the grid in y (uniform grid) */
+		   double delta_x = Lx/Nodesx; /* spacing of the grid in x (uniform grid) */
+		   double delta_y = Ly/Nodesy; /* spacing of the grid in y (uniform grid) */
 
-		   /* For each new i, we set the A matrix and b vector to zero */
+		   /* For u-velocity */
 
-		   for(int i=ngcx; i<(Nodesx+ngcx); i++){
-			   A_u_velocity = MatrixXd::Zero(Ny,Ny);
-			   b_u_velocity = VectorXd::Zero(Ny);
-			   A_v_velocity = MatrixXd::Zero(Ny,Ny);
-			   b_v_velocity = VectorXd::Zero(Ny);
+		   for(int i=ngc; i<(Nux - ngc); i++){
 
-			   for(int j=ngcy;j<(Nodesy+ngcy);j++){
+			   /* For each new i, we set the A matrix and b vector to zero */
 
-				   /* The values of the variables depend on whether they are at boundaries (north, south, east, west) or not
-				    * so we separate for each cases. First we write the nodes at boundaries */
-				   /* Equations for u_velocity */
-				   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i-1][j]);
-				   F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i][j]);
-				   F_s = 0.5 * density * (v_velocity[i][j] + v_velocity[i-1][j]);
-				   F_n = 0.5 * density * (v_velocity[i][j+1] + v_velocity[i-1][j+1]);
-				   D_w = Gamma_constant/delta_x;
-				   D_e = Gamma_constant/delta_x;
-				   D_s = Gamma_constant/delta_y;
-				   D_n = Gamma_constant/delta_y;
-				   a_w = D_w + 0.5 * F_w;
-				   a_e = D_e - 0.5 * F_e;
-				   a_s = D_s + 0.5 * F_s;
-				   a_n = D_n - 0.5 * F_n;
-				   S_p = 0.0;
-				   S_u = 0.0;
-				   delta_F = F_e + F_n - F_s - F_w;
-				   a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
-				   a_p = a_p/urfu;
-				   A_u_velocity(j,j) = a_p;
-				   A_u_velocity(j,j+1) = - a_n;
-				   A_u_velocity(j,j-1) = - a_s;
-				   b_u_velocity(j) = a_e * u_velocity[i+1][j] + a_w * u_velocity[i-1][j] + ( pressure[i-1][j] - pressure[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
-				   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
-
-				   /* Equations for v_velocity */
-				   F_w = 0.5 * density * ( u_velocity[i][j] + u_velocity[i][j-1]);
-				   F_e = 0.5 * density * ( u_velocity[i+1][j] + u_velocity[i+1][j-1]);
-				   F_s = 0.5 * density * (v_velocity[i][j-1] + v_velocity[i][j]);
-				   F_n = 0.5 * density * (v_velocity[i][j] + v_velocity[i][j+1]);
-				   D_w = Gamma_constant/delta_x;
-				   D_e = Gamma_constant/delta_x;
-				   D_s = Gamma_constant/delta_y;
-				   D_n = Gamma_constant/delta_y;
-				   a_w = D_w + 0.5 * F_w;
-				   a_e = D_e - 0.5 * F_e;
-				   a_s = D_s + 0.5 * F_s;
-				   a_n = D_n - 0.5 * F_n;
-				   S_p = 0.0;
-				   S_v = 0.0;
-				   delta_F = F_e + F_n - F_s - F_w;
-				   a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
-				   a_p = a_p/urfv;
-				   A_v_velocity(j,j) = a_p;
-				   A_v_velocity(j,j+1) = - a_n;
-				   A_v_velocity(j,j-1) = - a_s;
-				   b_v_velocity(j) = a_e * v_velocity[i+1][j] + a_w * v_velocity[i-1][j] + ( pressure[i][j-1] - pressure[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
-				   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
-
-				   /* adding the values of the residuals of the momentum equations */
-				   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity(j,j)*u_velocity[i][j] + A_u_velocity(j,j+1)*u_velocity[i][j+1] + A_u_velocity(j,j-1)*u_velocity[i][j-1] - b_u_velocity[j]);
-				   y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity(j,j)*v_velocity[i][j] + A_v_velocity(j,j+1)*v_velocity[i][j+1] + A_v_velocity(j,j-1)*v_velocity[i][j-1] - b_v_velocity[j]);
+			   for (int loopu1=0;loopu1 < Nuy; loopu1++){
+				   for (int loopu2=0; loopu2 < Nuy; loopu2++){
+						A_u_velocity[loopu1][loopu2] = 0.0;
+				   }
+					b_u_velocity[loopu1] = 0.0;
 			   }
 
-			   u_star.row(i) = A_u_velocity.colPivHouseholderQr().solve(b_u_velocity);
-			   v_star.row(i) = A_v_velocity.colPivHouseholderQr().solve(b_v_velocity);
+			   for(int j=ngc;j<(Nuy - ngc);j++){
 
-//			   u_star.row(i) = A_u_velocity.ldlt().solve(b_u_velocity);
-//			   v_star.row(i) = A_v_velocity.ldlt().solve(b_v_velocity);
+					   /* Equations for u_velocity for north (n), south (s), east (e) and west (w) */
+
+					   F_w = 0.5 * density * ( u_star[i][j] + u_star[i-1][j]);
+					   F_e = 0.5 * density * ( u_star[i+1][j] + u_star[i][j]);
+					   F_s = 0.5 * density * (v_star[i][j] + v_star[i-1][j]);
+					   F_n = 0.5 * density * (v_star[i][j+1] + v_star[i-1][j+1]);
+					   D_w = Gamma_constant/delta_x;
+					   D_e = Gamma_constant/delta_x;
+					   D_s = Gamma_constant/delta_y;
+					   D_n = Gamma_constant/delta_y;
+					   a_w = D_w + 0.5 * F_w;
+					   a_e = D_e - 0.5 * F_e;
+					   a_s = D_s + 0.5 * F_s;
+					   a_n = D_n - 0.5 * F_n;
+					   S_p = 0.0;
+					   S_u = 0.0;
+					   delta_F = F_e + F_n - F_s - F_w;
+					   a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+					   a_p = a_p/urfu;
+					   A_u_velocity[j][j] = a_p;
+					   A_u_velocity[j][j+1] = - a_n;
+					   A_u_velocity[j][j-1] = - a_s;
+					   b_u_velocity[j] = a_e * u_star[i+1][j] + a_w * u_star[i-1][j] + ( pressure_old[i-1][j] - pressure_old[i][j] ) * Area_velocity_node_u[i][j] +  S_u + (1 - urfu) * a_p * u_velocity_old[i][j];
+					   d_u[i][j] = Area_velocity_node_u[i][j]/a_p;
+
+					   /* adding the values of the residuals of the momentum equations */
+
+					   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter] + abs(A_u_velocity[j][j]*u_velocity[i][j] + A_u_velocity[j][j+1]*u_velocity[i][j+1] + A_u_velocity[j][j-1]*u_velocity[i][j-1] - b_u_velocity[j]);
+					   u_star[i][j] = (b_u_velocity[j] - A_u_velocity[j][j-1]*u_star[i][j-1] - A_u_velocity[j][j+1]*u_star[i][j+1] )/A_u_velocity[j][j];
+
+
+
+			   }
 		   }
+
+
+
+		   /* For v-velocity */
+
+		   for(int i=ngc; i<(Nvx - ngc); i++){
+
+			   /* For each new i, we set the A matrix and b vector to zero */
+
+			   for (int loopv1=0;loopv1 < Nvy; loopv1++){
+				   for (int loopv2=0; loopv2 < Nvy; loopv2++){
+						A_v_velocity[loopv1][loopv2] = 0.0;
+				   }
+					b_v_velocity[loopv1] = 0.0;
+			   }
+
+
+
+
+			   for(int j=ngc;j<(Nvy - ngc);j++){
+
+					   F_w = 0.5 * density * ( u_star[i][j] + u_star[i][j-1]);
+					   F_e = 0.5 * density * ( u_star[i+1][j] + u_star[i+1][j-1]);
+					   F_s = 0.5 * density * (v_star[i][j-1] + v_star[i][j]);
+					   F_n = 0.5 * density * (v_star[i][j] + v_star[i][j+1]);
+					   D_w = Gamma_constant/delta_x;
+					   D_e = Gamma_constant/delta_x;
+					   D_s = Gamma_constant/delta_y;
+					   D_n = Gamma_constant/delta_y;
+					   a_w = D_w + 0.5 * F_w;
+					   a_e = D_e - 0.5 * F_e;
+					   a_s = D_s + 0.5 * F_s;
+					   a_n = D_n - 0.5 * F_n;
+					   S_p = 0.0;
+					   S_v = 0.0;
+					   delta_F = F_e + F_n - F_s - F_w;
+					   a_p = a_w + a_e + a_s + a_n + delta_F - S_p;
+					   a_p = a_p/urfv;
+					   A_v_velocity[j][j] = a_p;
+					   A_v_velocity[j][j+1] = - a_n;
+					   A_v_velocity[j][j-1] = - a_s;
+					   b_v_velocity[j] = a_e * v_star[i+1][j] + a_w * v_star[i-1][j] + ( pressure_old[i][j-1] - pressure_old[i][j] ) * Area_velocity_node_v[i][j] +  S_v + (1 - urfv) * a_p * v_velocity_old[i][j];
+					   d_v[i][j] = Area_velocity_node_v[i][j]/a_p;
+
+					   y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter] + abs(A_v_velocity[j][j]*v_velocity[i][j] + A_v_velocity[j][j+1]*v_velocity[i][j+1] + A_v_velocity[j][j-1]*v_velocity[i][j-1] - b_v_velocity[j]);
+					   v_star[i][j] = (b_v_velocity[j] - A_v_velocity[j][j-1]*v_star[i][j-1] - A_v_velocity[j][j+1]*v_star[i][j+1] )/A_v_velocity[j][j];
+
+
+			   }
+		   }
+
 
 		   if(i_iter == 0){
 			   x_momentum_residual_sum_norm = x_momentum_residual_sum[0];
@@ -162,130 +193,6 @@ void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter)
 		   x_momentum_residual_sum[i_iter] = x_momentum_residual_sum[i_iter]/x_momentum_residual_sum_norm;
 		   y_momentum_residual_sum[i_iter] = y_momentum_residual_sum[i_iter]/y_momentum_residual_sum_norm;
 
-//		   	/* Guard cells just at the border */
-//		   	/* We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
-//		   	/* negative velocity, so when they sum, it is equal to zero, thus giving zero in between. */
-//
-//
-//		   	for (int j=ngcy;j<(Nodesy + ngcy);j++){
-//		   		/* west guard cells */
-//		   		u_star(ngcx,j) = 0.0;
-//		   		v_star((ngcx - 1),j) = - v_star(ngcx,j);
-//
-//		   		/* east guard cells */
-//		   		u_star((Nodesx + ngcx),j) = - u_star((Nodesx + ngcx - 1),j);
-//		   		v_star((Nodesx + ngcx - 1),j) = 0.0;
-//		   	}
-//
-//		   	for (int i=ngcx;i<(Nodesx + ngcx);i++) {
-//		   		/* south guard cells */
-//		   		u_star(i,(ngcy - 1)) = - u_star(i,ngcy);
-//		   		v_star(i,ngcy) = 0.0;
-//
-//		   		/* north guard cells */
-//		   		u_star(i,(Nodesy + ngcy - 1)) = lid_velocity;
-//		   		v_star(i,(Nodesy + ngcy)) = - v_star(i,(Nodesy + ngcy - 1));
-//		   	}
-//
-//		   /* Guard cells not just at the border */
-//
-//		   	/* west guard cells */
-//		   	for (int i=0;i<(ngcx - 1);i++){
-//		   		for (int j=0;j<Ny;j++){
-//		   			u_star(i,j) = 0.0;
-//		   			v_star(i,j) = 0.0;
-//		   		}
-//
-//		   	}
-//
-//		   	/* east guard cells */
-//		   	for (int i=(Nodesx + ngcx);i<Nx;i++){
-//		   		for (int j=0;j<Ny;j++){
-//		   			u_star(i,j) = 0.0;
-//		   			v_star(i,j) = 0.0;
-//		   		}
-//
-//		   	}
-//
-//		   	/* south guard cells */
-//		   	for (int i=0;i<Nx;i++){
-//		   		for (int j=0;j<(ngcy - 1);j++){
-//		   			u_star(i,j) = 0.0;
-//		   			v_star(i,j) = 0.0;
-//		   		}
-//
-//		   	}
-//
-//		   	/* north guard cells */
-//		   	for (int i=0;i<Nx;i++){
-//		   		for (int j=(Nodesy + ngcy);j<Ny;j++){
-//		   			u_star(i,j) = 0.0;
-//		   			v_star(i,j) = 0.0;
-//		   		}
-//
-//		   	}
-//
-//		   	/* corners */
-//		   	v_star((Nodesx + ngcx - 1),ngcy) = 0.0;
-//		   	u_star(ngcx,(Nodesy + ngcy - 1)) = lid_velocity;
-
-//			/* BC. We set the guard cells adjacent to nodes that are not exactly on the boundary, equal to the  */
-//			/* negative velocity, so when they sum, it is equal to zero */
-//			for (int j=ngcy;j<(Nodesy + ngcy);j++){
-//				u_star((Nodesx + ngcx),j) = -1.0 * u_star((Nodesx + ngcx - 1),j);
-//				v_star((ngcx - 1),j) = -1.0 * v_star(ngcx,j);
-//				u_star(ngcx,j) = 0.0;
-//				v_star((Nodesx + ngcx - 1),j) = 0.0;
-//			}
-//
-//			for (int i=ngcx;i<(Nodesx + ngcx);i++) {
-//				u_star(i,(ngcy - 1)) = -1.0 * u_star(i,ngcy);
-//				v_star(i,(Nodesy + ngcy)) = - 1.0 * v_star(i,(Nodesy + ngcy - 1));
-//				u_star(i,(Nodesy + ngcy - 1)) = lid_velocity;
-//				v_star(i,ngcy) = 0.0;
-//			}
-//
-//		   /* BC */
-//			/* west guard cells */
-//			for (int i=0;i<ngcx;i++){
-//				for (int j=0;j<Ny;j++){
-//					u_star(i,j) = 0.0;
-//					v_star(i,j) = 0.0;
-//				}
-//
-//			}
-//
-//			/* east guard cells */
-//			for (int i=(Nodesx + ngcx);i<Nx;i++){
-//				for (int j=0;j<Ny;j++){
-//					u_star(i,j) = 0.0;
-//					v_star(i,j) = 0.0;
-//				}
-//
-//			}
-//
-//			/* south guard cells */
-//			for (int i=0;i<Nx;i++){
-//				for (int j=0;j<ngcy;j++){
-//					u_star(i,j) = 0.0;
-//					v_star(i,j) = 0.0;
-//				}
-//
-//			}
-//
-//			/* north guard cells */
-//			for (int i=0;i<Nx;i++){
-//				for (int j=(Nodesy + ngcy);j<Ny;j++){
-//					u_star(i,j) = 0.0;
-//					v_star(i,j) = 0.0;
-//				}
-//
-//			}
-//
-////			u_star(ngcx,ngcy) = 0.0;
-//			v_star(ngcx,ngcy) = 0.0;
-//			u_star((Nodesx + ngcx - 1),(Nodesy + ngcy - 1)) = lid_velocity;
-////			v_star((Nodesx + ngcx - 1),(Nodesy + ngcy - 1)) = 0.0;
 }
 
 

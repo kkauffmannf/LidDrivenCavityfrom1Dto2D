@@ -10,18 +10,22 @@
  */
 
 #include <vector>
-#include <Eigen/SVD>
-#include <Eigen/Dense>
+#include <cmath>
+//#include <Eigen/SVD>
+//#include <Eigen/Dense>
 
-using namespace Eigen;
+//using namespace Eigen;
 
 /* Variables in input.txt to be defined at the start by the user. */
 extern int Nodesx; /* number of pressure nodes for the CV computation in the y direction */
 extern int Nodesy; /* number of pressure nodes for the CV computation in the x direction */
-extern int ngcx; /* number of guard cells in the x direction */
-extern int ngcy; /* number of guard cells in the y direction */
-extern int Nx; /* number of nodes plus guard cells in the x direction */
-extern int Ny; /* number of nodes plus guard cells in the y direction */
+extern int ngc; /* number of guard cells */
+extern int Npx; /* number of pressure nodes plus guard cells in the x direction */
+extern int Npy; /* number of pressure nodes plus guard cells in the y direction */
+extern int Nux; /* number of u-velocity nodes plus guard cells in the x direction */
+extern int Nuy; /* number of u-velocity plus guard cells in the y direction */
+extern int Nvx; /* number of v-velocity nodes plus guard cells in the x direction */
+extern int Nvy; /* number of v-velocity nodes plus guard cells in the y direction */
 extern double Lx; /* length of the cavity in the x direction */
 extern double Ly; /* length of the cavity in the y direction */
 extern double p_init;
@@ -70,7 +74,7 @@ void initialization();
 void boundary_conditions();
 void plotcolormap();
 void plotresiduals();
-void momentum_equation_solve(MatrixXd &u_star, MatrixXd &v_star, int i_iter);
-void pressure_correction_equation_solve(MatrixXd u_star, MatrixXd v_star, MatrixXd &pressure_prime, int i_iter);
-void correct_pressure_and_velocities(MatrixXd u_star, MatrixXd v_star, MatrixXd pressure_prime);
+void momentum_equation_solve(std::vector<std::vector<double>> &u_star, std::vector<std::vector<double>> &v_star, int i_iter);
+void pressure_correction_equation_solve(std::vector<std::vector<double>> u_star, std::vector<std::vector<double>> v_star, std::vector<std::vector<double>> &pressure_prime, int i_iter);
+void correct_pressure_and_velocities(std::vector<std::vector<double>> u_star, std::vector<std::vector<double>> v_star, std::vector<std::vector<double>> pressure_prime);
 //void underrelaxation(MatrixXd pressure_prime);

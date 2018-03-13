@@ -95,8 +95,8 @@ void readinput()
 
 	       /* prints out the input values */
 		   cout << "These are the input values:" << endl;
-		   cout << "Nx = " << Ny << endl;
-		   cout << "Ny = " << Nx << endl;
+		   cout << "Nx = " << Nodesx << endl;
+		   cout << "Ny = " << Nodesy << endl;
 		   cout << "Lx = " << Lx << endl;
 		   cout << "Ly = " << Ly << endl;
 		   cout << "p_init = " << p_init << endl;

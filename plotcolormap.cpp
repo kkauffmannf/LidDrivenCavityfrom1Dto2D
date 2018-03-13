@@ -28,27 +28,25 @@ void plotcolormap()
 //	double pi = atan(1)*4; //definition of pi
 
     // vector that stores the values of x y and velocity in 3 columns
-    vector< vector<double> > velocities((Nx*Ny), vector<double>(3));
-
-    // vector that stores the values of x y and pressure in 3 columns
-    vector< vector<double> > pressures((Nx*Ny), vector<double>(3));
+    vector< vector<double> > velocities((Npx*Npy), vector<double>(4));
 
     // intializing with zeroes
-    for(int counter1=0;counter1<(Nx*Ny);counter1++) {
+    for(int counter1=0;counter1<(Npx*Npy);counter1++) {
     	velocities[counter1][0]=0.0;
     	velocities[counter1][1]=0.0;
     	velocities[counter1][2]=0.0;
+    	velocities[counter1][3]=0.0;
     }
 
    // for each value of x, y loops from -r to r where r is the radius of the area
    // corresponding to that position x.
    int index=0;
-   for(int counter1=0;counter1<Ny;counter1++) {
-	   for(int counter2=0;counter2<Nx;counter2++){
-		   velocities[index][0]=position_v_velocity_node_y[counter1];
-		   velocities[index][1]=position_u_velocity_node_x[counter2];
+   for(int counter1=0;counter1<Npy;counter1++) {
+	   for(int counter2=0;counter2<Npx;counter2++){
+		   velocities[index][0]=position_u_velocity_node_y[counter1];
+		   velocities[index][1]=position_v_velocity_node_x[counter2];
 		   velocities[index][2]=sqrt(u_velocity[counter2][counter1]*u_velocity[counter2][counter1] + v_velocity[counter2][counter1]*v_velocity[counter2][counter1]);
-//		   velocities[index][2]=pressure[counter2][counter1];
+		   velocities[index][3]=pressure[counter2][counter1];
 //		   velocities[index][2]=u_velocity[counter2][counter1];
 		   index++;
        }
@@ -80,8 +78,8 @@ void plotcolormap()
 	//set ranges
 //	gp << "set xrange[0.0:" << Lx << "]\n";
 //	gp << "set yrange[0.0:" << Ly << "]\n";
-	gp << "set xrange[" << - (ngcx + 1) * Lx/(Nodesx-0.5) << ":" << Lx + (ngcx + 1) * Lx/(Nodesx-0.5) << "]\n";
-	gp << "set yrange[" << - (ngcy + 1) * Ly/(Nodesy-0.5) << ":" << Ly + (ngcy + 1) * Ly/(Nodesy-0.5) << "]\n";
+	gp << "set xrange[" << - (ngc + 1) * Lx/(Nodesx) << ":" << Lx + (ngc + 1) * Lx/(Nodesx) << "]\n";
+	gp << "set yrange[" << - (ngc + 1) * Ly/(Nodesy) << ":" << Ly + (ngc + 1) * Ly/(Nodesy) << "]\n";
 
 //	//plot with contours
 ////	gp << "set parametric\n";
@@ -94,6 +92,8 @@ void plotcolormap()
 //	gp << "splot " << gp.file1d(velocities) << " using 2:1:3\n";
 //	gp << "plot " << gp.file1d(velocities) << " using 2:1:3 with image pixels\n";
 	gp << "plot " << gp.file1d(velocities) << " using 2:1:3 with image pixels\n";
+	gp << "set term x11 1\n";
+	gp << "plot " << gp.file1d(velocities) << " using 2:1:4 with image pixels\n";
 
     //Generates pdf figure
 	gp << "set term pdf\nset output 'velocity_cavity.pdf'\nreplot\nset term x11";
